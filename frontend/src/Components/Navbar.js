@@ -7,7 +7,7 @@ const Navbar = () => {
         <div className="flex items-center gap-8 flex-1">
           <div className="flex items-center gap-2 text-[#1c74e9]">
             <span className="material-symbols-outlined text-3xl font-bold">storefront</span>
-            <h2 className="text-xl font-bold leading-tight tracking-tight hidden sm:block">Marketplace</h2>
+            <h2 className="text-xl font-bold leading-tight tracking-tight hidden sm:block">PickUp</h2>
           </div>
           <div className="relative flex-1 max-w-md hidden md:flex">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
