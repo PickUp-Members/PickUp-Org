@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   User, 
@@ -15,21 +15,39 @@ import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Mock authentication state - replace with real Auth logic later
-  // Imagine these coming from a global AuthContext
-  const [isLoggedIn, setIsLoggedIn] = useState(true); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [userRole, setUserRole] = useState('BUYER'); 
+  
+  // useRef to target the dropdown container
+  const menuRef = useRef(null);
+
   const [userData, setUserData] = useState({
     fullName: "Yasas Lasitha",
-    profilePic: null // Change to a URL string to test the image view
+    profilePic: null 
   });
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Helper to get the first letter of the name
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // If the menu is open and the click is NOT inside the menuRef, close it
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    // Attach listener to the document
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Cleanup the listener when the component unmounts
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const getInitial = (name) => {
-    return name ? name.charAt(0).toUpperCase() : '?';
+    return name ? name.trim().charAt(0).toUpperCase() : '?';
   };
 
   return (
@@ -43,7 +61,7 @@ const Navbar = () => {
             <h2 className="text-xl font-bold leading-tight tracking-tight hidden sm:block">PickUp</h2>
           </Link>
 
-          {/* Search Bar [cite: 68] */}
+          {/* Search Bar */}
           <div className="relative flex-1 max-w-md hidden md:flex">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
               <Search size={16} />
@@ -58,80 +76,72 @@ const Navbar = () => {
 
         {/* Action Icons */}
         <div className="flex items-center gap-3">
-          {/* Become a Seller Button [cite: 83] */}
           {!isLoggedIn || userRole === 'BUYER' ? (
             <Link to="/become-seller" className="hidden sm:flex items-center justify-center rounded-lg bg-[#1c74e9] px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 cursor-pointer">
               Become a Seller
             </Link>
           ) : null}
 
-          {/* Shopping Cart [cite: 73] */}
           <Link to="/cart" className="flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-200 cursor-pointer">
             <ShoppingCart size={20} />
           </Link>
 
-          {/* Profile Dropdown Container */}
-          <div className="relative">
+          {/* Profile Dropdown Container - Attached menuRef here */}
+          <div className="relative" ref={menuRef}>
             <button 
               onClick={toggleMenu}
-              className="h-9 w-9 rounded-full bg-[#1c74e9] flex items-center justify-center overflow-hidden border border-[#1c74e9]/30 hover:ring-2 hover:ring-[#1c74e9] transition-all cursor-pointer"
+              className="h-10 w-10 rounded-full bg-[#1c74e9] flex items-center justify-center overflow-hidden border-2 border-[#1c74e9]/30 hover:ring-2 hover:ring-[#1c74e9] transition-all cursor-pointer shadow-sm"
             >
               {isLoggedIn ? (
                 userData.profilePic ? (
-                  /* Display Profile Photo if it exists */
-                  <img 
-                    alt="User avatar" 
-                    className="h-full w-full object-cover" 
-                    src={userData.profilePic} 
-                  />
+                  <img alt="User profile" className="h-full w-full object-cover" src={userData.profilePic} />
                 ) : (
-                  /* Display Initial if no photo exists */
-                  <span className="text-white font-bold text-lg">
+                  <span className="text-white font-bold text-lg select-none">
                     {getInitial(userData.fullName)}
                   </span>
                 )
               ) : (
-                /* Display Generic Icon for guest */
                 <User className="text-white" size={20} />
               )}
             </button>
 
-            {/* Dropdown Menu */}
             {isMenuOpen && (
               <div className="absolute right-0 mt-3 w-56 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50">
                 <div className="py-2">
                   {!isLoggedIn ? (
                     <>
-                      <Link to="/login" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                      <Link to="/login" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
                         <LogIn size={18} className="text-[#1c74e9]" /> Login 
                       </Link>
-                      <Link to="/register" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                      <Link to="/register" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
                         <UserPlus size={18} className="text-[#1c74e9]" /> Register
                       </Link>
                     </>
                   ) : (
                     <>
-                      <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                        <p className="text-xs text-slate-400">Signed in as</p>
-                        <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{userData.fullName}</p>
+                      <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50">
+                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Signed in as</p>
+                        <p className="text-sm font-bold text-slate-800 truncate">{userData.fullName}</p>
                       </div>
-                      <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                      <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50">
                         <Settings size={18} /> Edit Profile 
                       </Link>
-                      <Link to="/history" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700">
+                      <Link to="/history" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50">
                         <History size={18} /> Order & Bid History 
                       </Link>
                       
-                      {/* Show Seller Dashboard only for Sellers [cite: 84] */}
                       {userRole === 'SELLER' && (
-                        <Link to="/seller/dashboard" className="flex items-center gap-3 px-4 py-3 text-sm text-[#1c74e9] font-bold hover:bg-blue-50">
+                        <Link to="/seller/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-[#1c74e9] font-bold hover:bg-blue-50">
                           <LayoutDashboard size={18} /> Shop Dashboard 
                         </Link>
                       )}
 
                       <button 
-                        onClick={() => setIsLoggedIn(false)}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => {
+                          setIsLoggedIn(false);
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 font-medium border-t border-slate-100"
                       >
                         <LogOut size={18} /> Log out 
                       </button>
