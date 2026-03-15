@@ -1,5 +1,4 @@
 import React from 'react';
-import Navbar from '../../Components/Navbar';
 import ProductCard from '../../Components/ProductCard';
 
 const Home = () => {
@@ -13,7 +12,6 @@ const Home = () => {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-[#f6f7f8] dark:bg-[#111821] font-display text-slate-900 dark:text-slate-100">
-      <Navbar />
       
       <main className="mx-auto w-full max-w-7xl px-4 lg:px-20 py-8">
         {/* Hero Section */}
