@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Hooks/useAuth';
 import { useCart } from '../Hooks/useCart';
-import { User, LogOut, Settings, LayoutDashboard, ShoppingCart, History, Shield, LogIn, UserPlus, Search } from 'lucide-react';
+import { User, LogOut, Settings, LayoutDashboard, ShoppingCart, History, Shield, LogIn, UserPlus, Search as SearchIcon } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const menuRef = useRef(null);
   const { user, logout } = useAuth();
   const { itemCount } = useCart();
@@ -23,17 +24,51 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to products page with search query
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   const getInitial = (name) => name ? name.trim().charAt(0).toUpperCase() : '?';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md px-4 lg:px-20 py-3 font-display">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2 text-[#1c74e9]">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 md:gap-8">
+        
+        {/* Logo & Brand */}
+        <Link to="/" className="flex items-center gap-2 text-[#1c74e9] shrink-0">
           <img src={logo} alt="PickUp" className="h-8 w-auto object-contain"/>
           <h2 className="text-xl font-bold hidden sm:block">PickUp</h2>
         </Link>
 
-        <div className="flex items-center gap-3">
+        {/* Search Bar - Center Section */}
+        <form 
+          onSubmit={handleSearch}
+          className="relative flex-1 max-w-md hidden md:block"
+        >
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+            <SearchIcon size={18} />
+          </div>
+          <input
+            type="text"
+            className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-10 pr-3 text-sm placeholder-slate-500 focus:border-[#1c74e9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1c74e9]/20 transition-all"
+            placeholder="Search auctions, electronics..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </form>
+
+        {/* Action Icons */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          
+          {/* Mobile Search Icon (Visible only on small screens) */}
+          <button className="p-2 text-slate-700 bg-slate-100 rounded-lg md:hidden hover:bg-slate-200">
+            <SearchIcon size={20} />
+          </button>
+
           <Link to="/cart" className="relative p-2 text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-all">
             <ShoppingCart size={20} />
             {itemCount > 0 && (
@@ -43,6 +78,7 @@ const Navbar = () => {
             )}
           </Link>
 
+          {/* Profile Dropdown */}
           <div className="relative" ref={menuRef}>
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="h-10 w-10 rounded-full bg-[#1c74e9] flex items-center justify-center overflow-hidden border-2 border-[#1c74e9]/30 hover:ring-2 hover:ring-[#1c74e9] transition-all cursor-pointer">
               {isLoggedIn ? (
