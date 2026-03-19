@@ -13,6 +13,7 @@ import Home from './Pages/Buyer/Home';
 import ProductList from './Pages/Buyer/ProductList';
 import ProductDetail from './Pages/Buyer/ProductDetail';
 import Cart from './Pages/Buyer/Cart';
+import Checkout from './Pages/Buyer/Checkout'; 
 import OrderHistory from './Pages/Buyer/OrderHistory';
 
 // Seller Pages
@@ -57,6 +58,10 @@ function AppContent() {
           {/* Buyer */}
           <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
+          
+          
+          <Route path="/checkout" element={<RequireAuth><Checkout /></RequireAuth>} />
+          
           <Route path="/orders" element={<RequireAuth><OrderHistory /></RequireAuth>} />
           
           {/* Seller */}

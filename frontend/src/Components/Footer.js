@@ -74,10 +74,36 @@ const Footer = () => {
           
           <div className="flex items-center gap-4">
             <span className="text-xs uppercase font-bold tracking-widest mr-2">Follow Us</span>
+            
             <div className="flex gap-2">
-              <a href="#" className="p-2.5 bg-slate-800 hover:bg-[#1c74e9] hover:text-white rounded-xl transition-all"><Facebook size={18} /></a>
-              <a href="#" className="p-2.5 bg-slate-800 hover:bg-[#1c74e9] hover:text-white rounded-xl transition-all"><Twitter size={18} /></a>
-              <a href="#" className="p-2.5 bg-slate-800 hover:bg-[#1c74e9] hover:text-white rounded-xl transition-all"><Instagram size={18} /></a>
+
+              <a 
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2.5 bg-slate-800 hover:bg-[#1c74e9] hover:text-white rounded-xl transition-all"
+              >
+                <Facebook size={18} />
+              </a>
+
+              <a 
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2.5 bg-slate-800 hover:bg-[#1c74e9] hover:text-white rounded-xl transition-all"
+              >
+                <Twitter size={18} />
+              </a>
+
+              <a 
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2.5 bg-slate-800 hover:bg-[#1c74e9] hover:text-white rounded-xl transition-all"
+              >
+                <Instagram size={18} />
+              </a>
+
             </div>
           </div>
         </div>

@@ -1,7 +1,18 @@
 import React from 'react';
-
+import { useCart } from '../Context/CartContext'; 
 const ProductCard = ({ product }) => {
+  const { addToCart } = useCart(); 
   const isAuction = product.type === "AUCTION";
+
+  const handleAction = (e) => {
+    e.preventDefault(); 
+    if (isAuction) { 
+      console.log("Placing bid for:", product.id);
+    } else { 
+      addToCart(product);
+      alert(`${product.title} added to cart!`); 
+    }
+  };
 
   return (
     <div className="group relative flex flex-col rounded-xl bg-white dark:bg-slate-800 p-3 shadow-sm transition-all hover:shadow-md border border-slate-100 dark:border-slate-700">
@@ -40,7 +51,14 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      <button className={`mt-4 w-full rounded-lg py-2 text-xs font-bold transition-all cursor-pointer ${isAuction ? 'bg-[#1c74e9] text-white hover:opacity-90' : 'bg-slate-100 dark:bg-slate-700 hover:bg-[#1c74e9] hover:text-white'}`}>
+      <button 
+        onClick={handleAction}
+        className={`mt-4 w-full rounded-lg py-2 text-xs font-bold transition-all cursor-pointer ${
+          isAuction 
+          ? 'bg-[#1c74e9] text-white hover:opacity-90' 
+          : 'bg-slate-100 dark:bg-slate-700 hover:bg-[#1c74e9] hover:text-white'
+        }`}
+      >
         {isAuction ? 'Place Bid' : 'Add to Cart'}
       </button>
     </div>
