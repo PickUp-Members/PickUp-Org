@@ -1,5 +1,11 @@
 // Mock API service layer using mockData
-import { mockUsers, mockProducts, mockBuyerOrders, mockSellerListings, mockSellerRequests, mockPlatformStats, mockDisputes } from '../Utils/mockData';
+import { 
+  mockUsers, 
+  mockProducts, 
+  mockSellerRequests, 
+  mockPlatformStats, 
+  mockDisputes 
+} from '../Utils/mockData';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -14,15 +20,31 @@ export const api = {
   // Products
   getProducts: async (filters = {}) => {
     await delay(300);
-    return mockProducts.filter(p => {
-      if (filters.type && p.type !== filters.type) return false;
-      if (filters.category && p.category !== filters.category) return false;
-      if (filters.search) {
-        const search = filters.search.toLowerCase();
-        return p.title.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
-      }
-      return true;
-    });
+    let filtered = [...mockProducts];
+
+    // Category Filter (Case-insensitive)
+    if (filters.category && filters.category !== 'All') {
+      filtered = filtered.filter(p => 
+        p.category.toLowerCase() === filters.category.toLowerCase()
+      );
+    }
+
+    // Listing Type Filter
+    if (filters.type && filters.type !== 'All') {
+      filtered = filtered.filter(p => p.type === filters.type);
+    }
+
+    // Search Filter
+    if (filters.search) {
+      const searchStr = filters.search.toLowerCase().trim();
+      filtered = filtered.filter(p => 
+        p.title.toLowerCase().includes(searchStr) || 
+        p.category.toLowerCase().includes(searchStr) ||
+        (p.brand && p.brand.toLowerCase().includes(searchStr))
+      );
+    }
+
+    return filtered;
   },
 
   getProduct: async (id) => {
@@ -52,18 +74,39 @@ export const api = {
     return { success: true, listingId: mockProducts.length + 1 };
   },
 
-  getSellerListings: async (sellerId) => mockSellerListings.filter(l => l.sellerId === sellerId),
+  getSellerListings: async (sellerId) => {
+    await delay(300);
+    return mockProducts.filter(p => p.sellerId === sellerId);
+  },
 
-  updateListing: async (id, updates) => ({ success: true }),
+  updateListing: async (id, updates) => {
+    await delay(300);
+    return { success: true };
+  },
 
   // Admin
-  getSellerRequests: async () => mockSellerRequests,
+  getSellerRequests: async () => {
+    await delay(400);
+    return mockSellerRequests;
+  },
 
-  approveSeller: async (userId) => ({ success: true }),
+  approveSeller: async (userId) => {
+    await delay(400);
+    return { success: true };
+  },
 
-  getPlatformStats: async () => mockPlatformStats,
+  getPlatformStats: async () => {
+    await delay(400);
+    return mockPlatformStats;
+  },
 
-  getDisputes: async () => mockDisputes,
+  getDisputes: async () => {
+    await delay(400);
+    return mockDisputes;
+  },
 
-  resolveDispute: async (id, resolution) => ({ success: true })
+  resolveDispute: async (id, resolution) => {
+    await delay(400);
+    return { success: true };
+  }
 };
