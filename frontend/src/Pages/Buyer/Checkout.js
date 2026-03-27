@@ -30,7 +30,7 @@ const Checkout = () => {
         }
       };
 
-      const response = await api.placeOrder(orderPayload);
+       const response = await api.placeOrder(orderPayload);
       
       if (response.success) {
         setOrderId(response.orderId);

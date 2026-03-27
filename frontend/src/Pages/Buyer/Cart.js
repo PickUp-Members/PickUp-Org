@@ -15,7 +15,7 @@ const Cart = () => {
     if (cartItems.length === 0) return;
     
     setIsProcessing(true);
-    setTimeout(() => {
+      setTimeout(() => {
       setIsProcessing(false);
       navigate('/checkout'); 
     }, 600);

@@ -59,8 +59,7 @@ function AppContent() {
           <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
           
-          
-          <Route path="/checkout" element={<RequireAuth><Checkout /></RequireAuth>} />
+                <Route path="/checkout" element={<RequireAuth><Checkout /></RequireAuth>} />
           
           <Route path="/orders" element={<RequireAuth><OrderHistory /></RequireAuth>} />
           
