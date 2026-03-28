@@ -9,7 +9,7 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true);
   
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const categoryFromUrl = searchParams.get('category') || 'All';
   const typeFromUrl = searchParams.get('type') || 'All';
   const queryFromUrl = searchParams.get('search') || '';

@@ -15,6 +15,7 @@ import ProductDetail from './Pages/Buyer/ProductDetail';
 import Cart from './Pages/Buyer/Cart';
 import Checkout from './Pages/Buyer/Checkout'; 
 import OrderHistory from './Pages/Buyer/OrderHistory';
+import Success from './Pages/Buyer/Success';
 
 // Seller Pages
 import SellerDashboard from './Pages/Seller/SellerDashboard';
@@ -33,7 +34,6 @@ function AppContent() {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // Hide Navbar and Footer on Auth Pages
   const hideLayout = ['/login', '/register'].includes(location.pathname);
 
   const RequireAuth = ({ children, roles = [] }) => {
@@ -48,27 +48,26 @@ function AppContent() {
       {!hideLayout && <Navbar />}
       <main className="flex-grow">
         <Routes>
-          {/* Public */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Buyer */}
+          {/* Buyer Routes */}
           <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
-          
-                <Route path="/checkout" element={<RequireAuth><Checkout /></RequireAuth>} />
-          
+          <Route path="/checkout" element={<RequireAuth><Checkout /></RequireAuth>} />
+          <Route path="/success" element={<RequireAuth><Success /></RequireAuth>} />
           <Route path="/orders" element={<RequireAuth><OrderHistory /></RequireAuth>} />
           
-          {/* Seller */}
+          {/* Seller Routes */}
           <Route path="/seller/become-seller" element={<RequireAuth><BecomeSeller /></RequireAuth>} />
           <Route path="/seller/add-listing" element={<RequireAuth roles={['SELLER', 'ADMIN']}><AddListing /></RequireAuth>} />
           <Route path="/seller/dashboard" element={<RequireAuth roles={['SELLER', 'ADMIN']}><SellerDashboard /></RequireAuth>} />
           
-          {/* Admin */}
+          {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<RequireAuth roles={['ADMIN']}><AdminDashboard /></RequireAuth>} />
 
           <Route path="*" element={<Navigate to="/" />} />
@@ -91,4 +90,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
