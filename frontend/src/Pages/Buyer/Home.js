@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; 
 import ProductCard from '../../Components/ProductCard';
 
 const Home = () => {
@@ -58,7 +58,7 @@ const Home = () => {
             {['All Categories', 'Electronics', 'Fashion', 'Home & Living', 'Collectibles', 'Gaming'].map((cat, i) => (
               <button 
                 key={cat} 
-                onClick={() => handleCategoryClick(cat)} 
+                onClick={() => handleCategoryClick(cat)}
                 className={`flex shrink-0 items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-colors cursor-pointer ${
                   i === 0 
                   ? 'bg-[#1c74e9] text-white' 

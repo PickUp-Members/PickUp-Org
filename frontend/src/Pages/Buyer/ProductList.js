@@ -7,7 +7,7 @@ import { Search, LayoutGrid } from 'lucide-react';
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const categoryFromUrl = searchParams.get('category') || 'All';
