@@ -19,7 +19,7 @@ const MyOrders = () => {
       price: '25,500',
       date: 'March 24, 2026',
       status: 'Processing',
-      image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=200', // ඔයාගේ watch image එක
+      image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=200', 
       statusColor: 'bg-yellow-100 text-yellow-700'
     },
     {
@@ -44,7 +44,7 @@ const MyOrders = () => {
             <ArrowLeft size={20} />
           </button>
           <h1 className="font-bold text-lg text-gray-800">My Orders</h1>
-          <div className="w-10"></div> 
+          <div className="w-10"></div>
         </div>
       </div>
 

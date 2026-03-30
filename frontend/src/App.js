@@ -6,6 +6,7 @@ import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 import { AuthProvider } from './Context/AuthContext';
 import { CartProvider } from './Context/CartContext';
+import { WishlistProvider } from './Context/WishlistContext'; 
 import { useAuth } from './Hooks/useAuth';
 
 // Buyer Pages
@@ -16,7 +17,7 @@ import Cart from './Pages/Buyer/Cart';
 import Checkout from './Pages/Buyer/Checkout'; 
 import OrderHistory from './Pages/Buyer/OrderHistory';
 import Success from './Pages/Buyer/Success';
-
+import Wishlist from './Pages/Buyer/Wishlist'; 
 // Seller Pages
 import SellerDashboard from './Pages/Seller/SellerDashboard';
 import BecomeSeller from './Pages/Seller/BecomeSeller';
@@ -56,10 +57,7 @@ const RequireAuth = ({ children, roles = [] }) => {
 function AppContent() {
   const { user } = useAuth();
   const location = useLocation();
-
-  // Login සහ Register පේජ්වලදී Navbar/Footer හංගන්න
   const hideLayout = ['/login', '/register'].includes(location.pathname);
-
   return (
     <div className="flex flex-col min-h-screen">
       {!hideLayout && <Navbar />}
@@ -76,6 +74,7 @@ function AppContent() {
           {/* --- Buyer Protected Routes --- */}
           <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
+          <Route path="/wishlist" element={<RequireAuth><Wishlist /></RequireAuth>} /> 
           <Route path="/checkout" element={<RequireAuth><Checkout /></RequireAuth>} />
           <Route path="/success" element={<RequireAuth><Success /></RequireAuth>} />
           <Route path="/orders" element={<RequireAuth><OrderHistory /></RequireAuth>} />
@@ -113,11 +112,13 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </CartProvider>
+      <WishlistProvider> 
+        <CartProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

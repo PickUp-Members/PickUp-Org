@@ -1,17 +1,26 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import ProductCard from '../../Components/ProductCard';
+import { ArrowRight, Laptop, Shirt, Home as HomeIcon, Ghost, Gamepad2 } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
 
   const handleCategoryClick = (category) => {
     if (category === 'All Categories') {
-      navigate('/products'); 
+      navigate('/products');
     } else {
       navigate(`/products?category=${category}`);
     }
   };
+
+  const categories = [
+    { name: 'All Categories', icon: <Ghost size={18} /> },
+    { name: 'Electronics', icon: <Laptop size={18} /> },
+    { name: 'Fashion', icon: <Shirt size={18} /> },
+    { name: 'Home & Living', icon: <HomeIcon size={18} /> },
+    { name: 'Gaming', icon: <Gamepad2 size={18} /> }
+  ];
 
   const products = [
     { id: 1, title: "Sony WH-1000XM4 Wireless Headphones", brand: "Sony", category: "Electronics", type: "FIXED", price: 299.99, stock: 12, img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" },
@@ -21,51 +30,36 @@ const Home = () => {
   ];
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-[#f6f7f8] dark:bg-[#111821] font-display text-slate-900 dark:text-slate-100">
-      
+    <div className="relative flex min-h-screen flex-col bg-[#f6f7f8] dark:bg-[#0f172a] font-display">
       <main className="mx-auto w-full max-w-7xl px-4 lg:px-20 py-8">
+        
         {/* Hero Section */}
         <section className="mb-12">
-          <div className="relative overflow-hidden rounded-xl bg-slate-900 text-white shadow-xl">
-            <div className="absolute inset-0 opacity-40">
-              <img className="h-full w-full object-cover" src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1000" alt="High tech gadgets" />
-            </div>
-            <div className="relative z-10 flex flex-col items-start justify-center p-8 md:p-16 lg:w-2/3">
-              <span className="mb-4 inline-block rounded-full bg-[#1c74e9] px-3 py-1 text-xs font-bold uppercase tracking-wider">Summer Sale</span>
-              <h1 className="mb-6 text-4xl font-extrabold leading-tight md:text-5xl">Upgrade Your Setup with Up to 40% Off</h1>
-              <p className="mb-8 text-lg text-slate-200">Discover the latest in tech, fashion, and home essentials.</p>
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 text-white shadow-2xl h-[400px]">
+            <img className="absolute inset-0 h-full w-full object-cover opacity-50" src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1000" alt="High tech gadgets" />
+            <div className="relative z-10 flex flex-col items-start justify-center h-full p-8 md:p-16 lg:w-2/3">
+              <span className="mb-4 inline-block rounded-full bg-blue-600 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest">Limited Offer</span>
+              <h1 className="mb-6 text-4xl font-black leading-tight md:text-6xl">Upgrade Your Setup with 40% Off</h1>
+              <p className="mb-8 text-lg text-slate-300 max-w-md">Discover the future of tech, style, and living in our exclusive summer collection.</p>
               <div className="flex gap-4">
-                <button 
-                  onClick={() => handleCategoryClick('Electronics')}
-                  className="rounded-lg bg-white px-6 py-3 text-sm font-bold text-slate-900 transition-transform hover:scale-105 cursor-pointer"
-                >
-                  Shop Tech
-                </button>
-                <button 
-                  onClick={() => navigate('/products?type=AUCTION')}
-                  className="rounded-lg bg-[#1c74e9] px-6 py-3 text-sm font-bold text-white transition-transform hover:scale-105 cursor-pointer"
-                >
-                  View Auctions
-                </button>
+                <button onClick={() => handleCategoryClick('Electronics')} className="rounded-2xl bg-white px-8 py-4 text-sm font-black text-slate-900 hover:bg-blue-50 transition-all shadow-xl">Shop Now</button>
+                <button onClick={() => navigate('/products?type=AUCTION')} className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-8 py-4 text-sm font-black text-white hover:bg-white/20 transition-all">Join Auctions</button>
               </div>
             </div>
           </div>
         </section>
 
         {/* Categories Section */}
-        <section className="mb-10 overflow-x-auto pb-4 no-scrollbar">
+        <section className="mb-12 overflow-x-auto pb-4 no-scrollbar">
           <div className="flex gap-4">
-            {['All Categories', 'Electronics', 'Fashion', 'Home & Living', 'Collectibles', 'Gaming'].map((cat, i) => (
+            {categories.map((cat) => (
               <button 
-                key={cat} 
-                onClick={() => handleCategoryClick(cat)}
-                className={`flex shrink-0 items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-colors cursor-pointer ${
-                  i === 0 
-                  ? 'bg-[#1c74e9] text-white' 
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#1c74e9]'
-                }`}
+                key={cat.name} 
+                onClick={() => handleCategoryClick(cat.name)}
+                className="flex shrink-0 items-center gap-3 rounded-2xl px-6 py-4 text-sm font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700 hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm group"
               >
-                {cat}
+                <span className="group-hover:scale-110 transition-transform">{cat.icon}</span>
+                {cat.name}
               </button>
             ))}
           </div>
@@ -73,16 +67,16 @@ const Home = () => {
 
         {/* Product Grid */}
         <section>
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Recommended for You</h2>
-            <div 
+          <div className="mb-8 flex items-center justify-between">
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white">Recommended for You</h2>
+            <button 
               onClick={() => navigate('/products')}
-              className="flex items-center gap-2 text-[#1c74e9] font-semibold text-sm cursor-pointer hover:underline"
+              className="group flex items-center gap-2 text-blue-600 font-bold text-sm"
             >
-              See All <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </div>
+              See All <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
