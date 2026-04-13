@@ -4,12 +4,14 @@ import { useCart } from '../../Context/CartContext';
 import { useAuth } from '../../Hooks/useAuth';
 import { api } from '../../Services/api';
 import { ArrowLeft, CreditCard, Truck, Loader2, ShieldCheck } from 'lucide-react';
+import { formatLKR } from '../../Utils/formatters';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { cartItems, cartTotal, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
 
   const shipping = cartItems.length > 0 ? 15.00 : 0;
   const total = cartTotal + shipping;
@@ -19,6 +21,7 @@ const Checkout = () => {
     if (cartItems.length === 0) return;
     
     setIsProcessing(true);
+    setError('');
 
     try {
       const orderPayload = {
@@ -41,7 +44,7 @@ const Checkout = () => {
         navigate('/success', { state: { orderId: response.orderId } });
       }
     } catch (error) {
-      alert("Order placement failed. Please try again.");
+      setError('Order placement failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -65,8 +68,13 @@ const Checkout = () => {
             </h2>
             
             <form onSubmit={handlePlaceOrder} className="space-y-6">
+              {error && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-600">
+                  {error}
+                </div>
+              )}
               <div className="space-y-4">
-                <input type="text" placeholder="Full Name" required className="w-full p-5 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-600 outline-none font-medium text-slate-700" />
+                <input type="text" placeholder="Full Name" required defaultValue={user?.fullName} className="w-full p-5 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-600 outline-none font-medium text-slate-700" />
                 <input type="email" placeholder="Email Address" required defaultValue={user?.email} className="w-full p-5 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-600 outline-none font-medium text-slate-700" />
                 <input type="text" placeholder="Delivery Address" required className="w-full p-5 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-600 outline-none font-medium text-slate-700" />
                 <div className="grid grid-cols-2 gap-4">
@@ -89,7 +97,7 @@ const Checkout = () => {
               </div>
               
               <button type="submit" disabled={isProcessing || cartItems.length === 0} className="w-full bg-[#1c74e9] text-white py-6 rounded-3xl font-black text-xl mt-10 hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 disabled:opacity-50 flex items-center justify-center gap-3">
-                {isProcessing ? <><Loader2 className="animate-spin" /> Finalizing Order...</> : `Confirm Order $${total.toLocaleString()}`}
+                {isProcessing ? <><Loader2 className="animate-spin" /> Finalizing Order...</> : `Confirm Order ${formatLKR(total)}`}
               </button>
             </form>
           </div>
@@ -108,23 +116,23 @@ const Checkout = () => {
                       </div>
                       <div>
                         <p className="font-bold text-slate-800 text-sm line-clamp-1">{item.title}</p>
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-tighter">Price: ${item.price}</p>
+                        <p className="text-slate-400 text-xs font-bold uppercase tracking-tighter">Price: {formatLKR(item.price || 0)}</p>
                       </div>
                     </div>
-                    <span className="font-black text-slate-700">${(item.price * item.quantity).toLocaleString()}</span>
+                    <span className="font-black text-slate-700">{formatLKR((item.price || 0) * item.quantity)}</span>
                   </div>
                 ))}
               </div>
               
               <div className="space-y-3 pt-6 border-t border-slate-100">
                 <div className="flex justify-between text-slate-500 font-bold">
-                  <span>Subtotal</span><span>${cartTotal.toLocaleString()}</span>
+                  <span>Subtotal</span><span>{formatLKR(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-slate-500 font-bold">
-                  <span>Shipping</span><span>${shipping.toLocaleString()}</span>
+                  <span>Shipping</span><span>{formatLKR(shipping)}</span>
                 </div>
                 <div className="flex justify-between pt-4 text-3xl font-black text-[#1c74e9]">
-                  <span>Total</span><span>${total.toLocaleString()}</span>
+                  <span>Total</span><span>{formatLKR(total)}</span>
                 </div>
               </div>
             </div>

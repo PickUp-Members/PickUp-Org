@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../Context/CartContext';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, Loader2 } from 'lucide-react';
+import { formatLKR } from '../../Utils/formatters';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const Cart = () => {
                   <img src={item.img} alt={item.title} className="w-24 h-24 object-cover rounded-2xl bg-slate-100" />
                   <div className="flex-1">
                     <h3 className="font-bold text-slate-900 dark:text-white line-clamp-1">{item.title}</h3>
-                    <div className="text-blue-600 font-black text-lg mt-1">${item.price?.toLocaleString()}</div>
+                    <div className="text-blue-600 font-black text-lg mt-1">{formatLKR(item.price || 0)}</div>
                   </div>
                   <div className="flex flex-col items-end gap-3">
                     <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
@@ -68,12 +69,12 @@ const Cart = () => {
             <div className="bg-white dark:bg-slate-800 rounded-[35px] p-8 shadow-xl border border-slate-50 sticky top-10">
               <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Summary</h2>
               <div className="space-y-5 mb-8">
-                <div className="flex justify-between text-slate-500 font-medium"><span>Subtotal</span><span>${cartTotal.toLocaleString()}</span></div>
-                <div className="flex justify-between text-slate-500 font-medium"><span>Shipping Fee</span><span>${shipping.toFixed(2)}</span></div>
+                <div className="flex justify-between text-slate-500 font-medium"><span>Subtotal</span><span>{formatLKR(cartTotal)}</span></div>
+                <div className="flex justify-between text-slate-500 font-medium"><span>Shipping Fee</span><span>{formatLKR(shipping)}</span></div>
                 <div className="h-px bg-slate-100 dark:bg-slate-700 my-2"></div>
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-lg font-bold dark:text-white">Total</span>
-                  <span className="text-blue-600 text-3xl font-black">${total.toLocaleString()}</span>
+                  <span className="text-blue-600 text-3xl font-black">{formatLKR(total)}</span>
                 </div>
               </div>
               <button 

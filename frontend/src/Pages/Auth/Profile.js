@@ -6,16 +6,21 @@ import { User, Mail, MapPin, Save, ShieldCheck } from 'lucide-react';
 const Profile = () => {
   const { user, updateProfile } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
     addresses: (user?.addresses || ['']).join(', '),
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateProfile(formData);
-    setEditing(false);
+    setSaving(true);
+    const result = await updateProfile(formData);
+    if (result?.success) {
+      setEditing(false);
+    }
+    setSaving(false);
   };
 
   if (!user) return <div className="p-20 text-center font-black text-slate-400 uppercase tracking-widest">Please log in to view profile.</div>;
@@ -57,8 +62,8 @@ const Profile = () => {
                 <Input label="Full Name" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} className="rounded-xl" />
                 <Input label="Addresses (comma separated)" value={formData.addresses} onChange={(e) => setFormData({...formData, addresses: e.target.value})} className="rounded-xl" />
                 <div className="flex gap-4 pt-4">
-                  <Button type="submit" size="lg" className="flex-1 rounded-2xl h-14 font-black">
-                    <Save size={18} className="mr-2" /> Save Changes
+                  <Button type="submit" size="lg" className="flex-1 rounded-2xl h-14 font-black" disabled={saving}>
+                    <Save size={18} className="mr-2" /> {saving ? 'Saving...' : 'Save Changes'}
                   </Button>
                   <Button type="button" variant="secondary" size="lg" onClick={() => setEditing(false)} className="flex-1 rounded-2xl h-14 font-black">
                     Cancel

@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../../Components/ProductCard';
 import { useRecent } from '../../Context/RecentlyViewedContext';
 import { ArrowRight, Laptop, Shirt, Home as HomeIcon, Ghost, Gamepad2 } from 'lucide-react';
 import { formatLKR } from '../../Utils/formatters';
+import { api } from '../../Services/api';
 
 const Home = () => {
   const navigate = useNavigate();
   const { recentItems } = useRecent();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const items = await api.getProducts();
+      setProducts(items.slice(0, 4));
+    };
+
+    loadProducts();
+  }, []);
 
   const handleCategoryClick = (category) => {
     category === 'All Categories' ? navigate('/products') : navigate(`/products?category=${category}`);
@@ -19,13 +30,6 @@ const Home = () => {
     { name: 'Fashion', icon: <Shirt size={18} /> },
     { name: 'Home & Living', icon: <HomeIcon size={18} /> },
     { name: 'Gaming', icon: <Gamepad2 size={18} /> }
-  ];
-
-  const products = [
-    { id: 1, title: "Sony WH-1000XM4 Wireless Headphones", brand: "Sony", category: "Electronics", type: "FIXED", price: 299.99, img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" },
-    { id: 2, title: "Limited Edition Silver Mechanical Watch", brand: "Omega", category: "Fashion", type: "AUCTION", currentBid: 1450.00, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500" },
-    { id: 3, title: "Nike Air Zoom Pegasus 38 - Crimson Red", brand: "Nike", category: "Fashion", type: "FIXED", price: 120.00, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" },
-    { id: 4, title: "Designer Ergonomic Office Task Chair", brand: "Aeron", category: "Home & Living", type: "AUCTION", currentBid: 415.00, img: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500" }
   ];
 
   return (

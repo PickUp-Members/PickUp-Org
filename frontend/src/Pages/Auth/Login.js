@@ -23,7 +23,7 @@ const Login = () => {
       else if (result.user.role === 'SELLER') navigate('/seller/dashboard');
       else navigate('/');
     } else {
-      setError(result.error);
+      setError(result.error || 'Unable to sign in.');
     }
     setLoading(false);
   };

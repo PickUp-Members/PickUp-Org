@@ -120,6 +120,11 @@ const Navbar = () => {
                         <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest">Signed in as</p>
                         <p className="text-sm font-black truncate text-slate-900">{user.fullName}</p>
                       </div>
+                      {userRole === 'BUYER' && (
+                        <Link to="/seller/become-seller" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-[#1c74e9] font-black hover:bg-blue-50">
+                          <LayoutDashboard size={18} /> {user.sellerRequestStatus === 'PENDING' ? 'Seller Request' : 'Become a Seller'}
+                        </Link>
+                      )}
                       <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 font-bold hover:bg-slate-50"><Settings size={18} className="text-slate-400" /> Edit Profile</Link>
                       {userRole === 'SELLER' && <Link to="/seller/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-[#1c74e9] font-black hover:bg-blue-50"><LayoutDashboard size={18} /> Shop Dashboard</Link>}
                       {userRole === 'ADMIN' && <Link to="/admin/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 font-black hover:bg-red-50"><Shield size={18} /> Admin Panel</Link>}

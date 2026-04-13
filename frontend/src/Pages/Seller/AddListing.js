@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
-import { Plus, Tag, DollarSign, Package, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react'; 
+import { Plus, Package, CheckCircle, ArrowRight, ArrowLeft, Gavel } from 'lucide-react';
 import Button from '../../Components/Button';
 import Input from '../../Components/Input';
 import { useAuth } from '../../Hooks/useAuth';
 import { api } from '../../Services/api';
 import Modal from '../../Components/Modal';
+import { formatLKR } from '../../Utils/formatters';
 
 const AddListing = () => {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [createdListing, setCreatedListing] = useState(null);
+  const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '',
+    imageUrl: '',
     type: 'FIXED', // FIXED or AUCTION
     price: '',
     stock: '1',
@@ -29,16 +33,57 @@ const AddListing = () => {
     return <div className="p-20 text-center font-black text-slate-400 uppercase tracking-widest">Access Denied: Sellers Only</div>;
   }
 
-  const handleNext = () => setStep(prev => prev + 1);
+  const validateStep = () => {
+    if (step === 1) {
+      if (!formData.title.trim() || !formData.description.trim() || !formData.category.trim()) {
+        setError('Please complete the basic listing details before continuing.');
+        return false;
+      }
+    }
+
+    if (step === 2) {
+      if (formData.type === 'FIXED' && (!formData.price || Number(formData.price) <= 0 || !formData.stock || Number(formData.stock) <= 0)) {
+        setError('Fixed-price listings need a valid price and stock quantity.');
+        return false;
+      }
+
+      if (formData.type === 'AUCTION' && (!formData.startPrice || Number(formData.startPrice) <= 0)) {
+        setError('Auction listings need a starting bid.');
+        return false;
+      }
+    }
+
+    if (step === 3 && formData.type === 'AUCTION') {
+      if (!formData.endDate) {
+        setError('Please choose an auction end date.');
+        return false;
+      }
+      if (!formData.increment || Number(formData.increment) <= 0) {
+        setError('Please set a valid minimum bid increment.');
+        return false;
+      }
+    }
+
+    setError('');
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validateStep()) return;
+    setStep(prev => prev + 1);
+  };
+
   const handlePrev = () => setStep(prev => prev - 1);
 
   const handleSubmit = async () => {
     setLoading(true);
+    setError('');
     try {
-      await api.createListing(formData, user.id);
+      const result = await api.createListing(formData, user.id);
+      setCreatedListing(result.listing);
       setShowSuccess(true);
     } catch (error) {
-      console.error("Publishing failed", error);
+      setError('Publishing failed. Please review the listing details and try again.');
     } finally {
       setLoading(false);
     }
@@ -67,20 +112,24 @@ const AddListing = () => {
           </div>
 
           <div className="p-12">
+            {error && (
+              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                {error}
+              </div>
+            )}
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                <Input label="Product Title" icon={Tag} placeholder="e.g. MacBook Pro M2 2023" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
-                <div className="space-y-1">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Description</label>
-                    <textarea 
-                        className="w-full px-4 py-3 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-[#1c74e9] outline-none min-h-[150px]"
-                        value={formData.description}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        placeholder="Tell buyers everything about your item..."
-                    />
-                </div>
+                <Input label="Product Title" placeholder="e.g. MacBook Pro M2 2023" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+                <Input.TextArea
+                  label="Description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Tell buyers everything about your item..."
+                  rows={5}
+                />
                 <Input label="Category" placeholder="Electronics, Home, etc." value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
+                <Input label="Image URL" placeholder="https://..." value={formData.imageUrl} onChange={(e) => setFormData({...formData, imageUrl: e.target.value})} />
                 <Button size="lg" className="w-full rounded-2xl h-14" onClick={handleNext}>Continue to Pricing <ArrowRight size={18} className="ml-2" /></Button>
               </div>
             )}
@@ -96,13 +145,12 @@ const AddListing = () => {
                 <Input 
                     label={formData.type === 'FIXED' ? "Selling Price (LKR)" : "Starting Bid (LKR)"} 
                     type="number" 
-                    icon={DollarSign} 
                     value={formData.type === 'FIXED' ? formData.price : formData.startPrice}
                     onChange={(e) => setFormData({...formData, [formData.type === 'FIXED' ? 'price' : 'startPrice']: e.target.value})}
                 />
 
                 {formData.type === 'FIXED' && (
-                    <Input label="Stock Quantity" type="number" icon={Package} value={formData.stock} onChange={(e) => setFormData({...formData, stock: e.target.value})} />
+                    <Input label="Stock Quantity" type="number" value={formData.stock} onChange={(e) => setFormData({...formData, stock: e.target.value})} />
                 )}
 
                 <div className="flex gap-4">
@@ -142,7 +190,20 @@ const AddListing = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center"><span className="text-slate-500 font-bold">Item</span><span className="font-black text-slate-900">{formData.title}</span></div>
                     <div className="flex justify-between items-center"><span className="text-slate-500 font-bold">Type</span><span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-black">{formData.type}</span></div>
-                    <div className="flex justify-between items-center border-t border-slate-200 pt-4"><span className="text-slate-900 font-black">Total Value</span><span className="text-2xl font-black text-[#1c74e9]">LKR {formData.type === 'FIXED' ? formData.price : formData.startPrice}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-slate-500 font-bold">Category</span><span className="font-black text-slate-900">{formData.category}</span></div>
+                    <div className="flex justify-between items-center border-t border-slate-200 pt-4"><span className="text-slate-900 font-black">Total Value</span><span className="text-2xl font-black text-[#1c74e9]">{formatLKR(formData.type === 'FIXED' ? Number(formData.price || 0) : Number(formData.startPrice || 0))}</span></div>
+                    {formData.type === 'AUCTION' && (
+                      <div className="grid grid-cols-2 gap-4 pt-2 text-sm text-slate-600">
+                        <div className="rounded-2xl bg-white p-4">
+                          <p className="mb-1 font-bold text-slate-900">Increment</p>
+                          <p>{formatLKR(Number(formData.increment || 0))}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white p-4">
+                          <p className="mb-1 font-bold text-slate-900">Ends</p>
+                          <p>{formData.endDate ? new Date(formData.endDate).toLocaleString('en-LK') : 'Not set'}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -164,6 +225,16 @@ const AddListing = () => {
           </div>
           <h2 className="text-3xl font-black text-slate-900 mb-2">Live Now!</h2>
           <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mb-10">Your listing is now visible to thousands of buyers</p>
+          {createdListing && (
+            <div className="mb-6 rounded-2xl bg-slate-50 p-4 text-left text-sm text-slate-600">
+              <div className="mb-2 flex items-center gap-2 font-bold text-slate-900">
+                {createdListing.type === 'AUCTION' ? <Gavel size={16} /> : <Package size={16} />}
+                Listing summary
+              </div>
+              <p>{createdListing.title}</p>
+              <p className="mt-1">{formatLKR(createdListing.price || createdListing.currentBid || createdListing.startPrice || 0)}</p>
+            </div>
+          )}
           <Button to="/seller/dashboard" className="w-full h-14 rounded-2xl font-black">Go to Dashboard</Button>
         </div>
       </Modal>

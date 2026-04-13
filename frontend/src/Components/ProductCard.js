@@ -21,7 +21,6 @@ const ProductCard = ({ product }) => {
       handleProductClick();
     } else {
       addToCart(product);
-      alert(`${product.title} added to cart!`);
     }
   };
 
