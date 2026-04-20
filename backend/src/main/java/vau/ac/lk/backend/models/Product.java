@@ -35,4 +35,6 @@ public class Product {
 
     private List<String> images;
     private String status = "ACTIVE"; // ACTIVE, ENDED, DRAFT
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
