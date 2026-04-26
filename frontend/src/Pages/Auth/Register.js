@@ -2,22 +2,21 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { useAuth } from '../../Hooks/useAuth';
+import { useAuthStore } from '../../store/authStore'
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
+
+  const { register, loading } = useAuthStore();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (field) => (event) => {
-    setFormData(prev => ({ ...prev, [field]: event.target.value }));
-  };
+  const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -28,24 +27,28 @@ const Register = () => {
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
+    if (formData.password != formData.confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
-    setLoading(true);
     const result = await register({
       fullName: formData.fullName,
       email: formData.email,
-      password: formData.password
+      password: formData.password,
+      role: 'BUYER'
     });
 
     if (result.success) {
       navigate('/');
-    } else {
+    }
+    else {
       setError(result.error || 'Unable to create your account right now.');
     }
-    setLoading(false);
+  };
+
+  const handleChange = (field) => (event) => {
+    setFormData(prev => ({ ...prev, [field]: event.target.value }));
   };
 
   return (

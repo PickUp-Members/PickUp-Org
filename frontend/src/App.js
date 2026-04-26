@@ -69,17 +69,15 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <RecentlyViewedProvider>
-        <WishlistProvider> 
-          <CartProvider>
-            <Router>
-              <AppContent />
-            </Router>
-          </CartProvider>
-        </WishlistProvider>
-      </RecentlyViewedProvider>
-    </AuthProvider>
+    <RecentlyViewedProvider>
+      <WishlistProvider> 
+        <CartProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </CartProvider>
+      </WishlistProvider>
+    </RecentlyViewedProvider>
   );
 }
 
