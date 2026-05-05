@@ -1,19 +1,24 @@
 package vau.ac.lk.backend.services;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vau.ac.lk.backend.models.User;
+import vau.ac.lk.backend.models.enums.RequestStatus;
+import vau.ac.lk.backend.models.support.Business;
 import vau.ac.lk.backend.repositories.UserRepository;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passEncoder;
+
+    public UserService(UserRepository userRepo, PasswordEncoder passEncoder) {
+        this.userRepo = userRepo;
+        this.passEncoder = passEncoder;
+    }
 
     // Logic to register new user
     public User registerUser(User user) {
@@ -24,5 +29,21 @@ public class UserService {
     // Logic to find a user by email
     public Optional<User> findByEmail (String email) {
         return userRepo.findByEmail(email);
+    }
+
+    // Request for become a seller (API For BUYERS)
+    public User applySeller(String id, Business business) {
+        Optional<User> userOptional = userRepo.findById(id);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            user.setBusinessDetails(business);
+            user.setSellerRequestStatus(RequestStatus.PENDING);
+
+            return userRepo.save(user);
+        }
+
+        return null;
     }
 }

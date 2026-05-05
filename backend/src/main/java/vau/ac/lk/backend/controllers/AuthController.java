@@ -1,6 +1,5 @@
 package vau.ac.lk.backend.controllers;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class AuthController {
 
@@ -21,11 +19,24 @@ public class AuthController {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passEncoder;
 
+    public AuthController(UserService userService, JwtUtils jwtUtils, PasswordEncoder passEncoder) {
+        this.userService = userService;
+        this.jwtUtils = jwtUtils;
+        this.passEncoder = passEncoder;
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
             User savedUser = userService.registerUser(user);
-            return ResponseEntity.ok(savedUser);
+
+            String token = jwtUtils.generateToken(savedUser.getEmail());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", savedUser);
+            response.put("token", token);
+
+            return ResponseEntity.ok(response);
         }
         catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: Email already exists or invalid data");

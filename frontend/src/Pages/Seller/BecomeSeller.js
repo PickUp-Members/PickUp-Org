@@ -7,12 +7,14 @@ import { CheckCircle, AlertCircle, Store, FileText } from 'lucide-react';
 
 const BecomeSeller = () => {
   const { user, requestSellerAccess } = useAuth();
+  
   const [formData, setFormData] = useState({
     businessName: user?.businessDetails?.name || '',
     description: user?.businessDetails?.description || '',
-    contact: user?.businessDetails?.contact || '',
+    contactPhone: user?.businessDetails?.contact || '',
     documents: user?.businessDetails?.documents || '',
   });
+  
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,12 +23,23 @@ const BecomeSeller = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const result = await requestSellerAccess(formData);
-    if (result.success) {
+    
+    const payload = {
+      name: formData.businessName,
+      description: formData.description,
+      contactPhone: formData.contact,
+      documents: formData.documents
+    };
+
+    const results = await requestSellerAccess(payload);
+
+    if (results.success) {
       setShowModal(true);
-    } else {
-      setError('We could not submit your seller application right now.');
     }
+    else {
+      setError(results.error || 'We could not submit your request. Please try again later.');
+    }
+
     setLoading(false);
   };
 

@@ -20,8 +20,8 @@ const Login = () => {
     if (result.success) {
       const userRole = result.user?.role;
 
-      if (userRole === 'ADMIN') navigate('admin/dashboard');
-      else if (userRole === 'SELLER') navigate('seller/dashboard');
+      if (userRole === 'ADMIN') navigate('/admin/dashboard');
+      else if (userRole === 'SELLER') navigate('/seller/dashboard');
       else navigate('/');
     }
     else {
