@@ -17,7 +17,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PutMapping("/{id}/become-seller")
+    @PutMapping("/{id}/become-seller") // For Buyes
     public ResponseEntity<?> applySeller(@PathVariable String id, @RequestBody Business business) {
         User updatedUser = userService.applySeller(id, business);
 
@@ -26,4 +26,6 @@ public class UserController {
         }
         return ResponseEntity.badRequest().body("User not found or request failed.");
     }
+
+
 }

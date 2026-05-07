@@ -1,12 +1,10 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-// ✅ BASE API
 const API = axios.create({
     baseURL: 'http://localhost:8080/api'
 });
 
-// ✅ Attach JWT automatically
 API.interceptors.request.use((config) => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user && user.token) {
@@ -15,6 +13,19 @@ API.interceptors.request.use((config) => {
     return config;
 });
 
+API.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            console.warn('Unauthorized! Logging out...');
+
+            localStorage.removeItem('user');
+
+            window.location.href = '/login';
+        }
+    }
+);
+
 export const useAuthStore = create((set) => ({
     user: JSON.parse(localStorage.getItem('user')) || null,
     loading: false,
@@ -22,13 +33,12 @@ export const useAuthStore = create((set) => ({
 
     // ================= REGISTER =================
     register: async (userData) => {
-        set({ loading: true });
+        set({ loading: true, error: null });
 
         try {
-            const res = await API.post('/auth/register', userData);
+            await API.post('/auth/register', userData);
 
-            set({ user: res.data, loading: false });
-            localStorage.setItem('user', JSON.stringify(res.data));
+            set({ loading: false });
 
             return { success: true };
 
@@ -44,19 +54,18 @@ export const useAuthStore = create((set) => ({
 
     // ================= LOGIN =================
     login: async (email, password) => {
-        set({ loading: true });
+        set({ loading: true, error: null });
 
         try {
             const res = await API.post('/auth/login', { email, password });
 
             const { user, token } = res.data;
-
             const userData = { ...user, token };
 
             set({ user: userData, loading: false });
             localStorage.setItem('user', JSON.stringify(userData));
 
-            return { success: true };
+            return { success: true, user: userData };
 
         } catch (err) {
             set({
