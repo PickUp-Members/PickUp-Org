@@ -11,7 +11,7 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   
-  // Placeholder for user - will be replaced with actual auth context later
+  
   const user = null;
 
   const shipping = cartItems.length > 0 ? 15.00 : 0;

@@ -455,8 +455,49 @@ export const mockProducts = [
 
 // Buyer carts, orders
 export const mockCartItems = [{ productId: 1, quantity: 2 }];
-export const mockBuyerOrders = [{ id: 1, productId: 1, status: "DELIVERED", total: 90000, date: "2026-03-01" }];
-export const mockBidHistory = [{ productId: 2, bidAmount: 24000, status: "LOST" }];
+export const mockBuyerOrders = [
+  { 
+    id: 1, 
+    productId: 1, 
+    productTitle: "Sony WH-1000XM4 Headphones",
+    status: "DELIVERED", 
+    total: 34300, 
+    date: "2026-03-01",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
+  },
+  { 
+    id: 2, 
+    productId: 21, 
+    productTitle: "Omega Mechanical Watch",
+    status: "PENDING", 
+    total: 24500, 
+    date: "2026-05-05",
+    image: "https://images.unsplash.com/photo-1524592094714-0f25c5025c32?w=400"
+  },
+  { 
+    id: 3, 
+    productId: 26, 
+    productTitle: "Nike Air Pegasus 38",
+    status: "DELIVERED", 
+    total: 18000, 
+    date: "2026-04-15",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400"
+  },
+  { 
+    id: 4, 
+    productId: 16, 
+    productTitle: "Portable Gaming Console",
+    status: "CANCELLED", 
+    total: 98000, 
+    date: "2026-02-20",
+    image: "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=400"
+  }
+];
+export const mockBidHistory = [
+  { productId: 2, bidAmount: 18500, status: "ACTIVE" },
+  { productId: 21, bidAmount: 24000, status: "WON" },
+  { productId: 18, bidAmount: 16500, status: "LOST" }
+];
 
 // Seller listings, sales
 export const mockSellerListings = [{ productId: 1, sellerId: 2, status: "ACTIVE" }];

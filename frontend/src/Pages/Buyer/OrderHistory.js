@@ -1,24 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PackageCheck, Gavel, Clock, Filter, ChevronRight, ShoppingBag } from 'lucide-react';
 import { formatLKR, formatDate, getStatusColor } from '../../Utils/formatters';
-import { mockBuyerOrders, mockBidHistory } from '../../Utils/mockData';
+import { mockBidHistory, mockProducts } from '../../Utils/mockData';
+import { api } from '../../Services/api';
 
 const OrderHistory = () => {
   const [activeTab, setActiveTab] = useState('orders');
   const [filter, setFilter] = useState('all');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const orders = mockBuyerOrders.map(order => ({
-    ...order,
-    date: order.date || '2026-03-24', 
-    status: order.status || 'DELIVERED',
-    image: order.image || 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=200' 
-  }));
+  useEffect(() => {
+    const loadOrders = async () => {
+      setLoading(true);
+      const buyerOrders = await api.getBuyerOrders();
+      setOrders(buyerOrders.map(order => ({
+        ...order,
+        date: order.date || '2026-03-24', 
+        status: order.status || 'DELIVERED',
+        image: order.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
+        productTitle: order.productTitle || 'Product'
+      })));
+      setLoading(false);
+    };
+    loadOrders();
+  }, []);
 
-  const bids = mockBidHistory;
+  const bids = mockBidHistory.map(bid => {
+    const product = mockProducts.find(p => p.id === bid.productId);
+    return {
+      ...bid,
+      productTitle: product?.title || 'Auction Product',
+      productImage: product?.img
+    };
+  });
 
   const filteredOrders = orders.filter(order => filter === 'all' || order.status === filter);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f6f7f8] py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-500 font-bold">Loading orders...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f6f7f8] py-12">
@@ -71,7 +101,7 @@ const OrderHistory = () => {
               {filteredOrders.length > 0 ? filteredOrders.map(order => (
                 <div 
                   key={order.id} 
-                  onClick={() => navigate(`/products/${order.productId || '1'}`)}
+                  onClick={() => navigate(`/products/${order.productId}`)}
                   className="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-blue-900/5 transition-all group cursor-pointer"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
@@ -81,9 +111,10 @@ const OrderHistory = () => {
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-black text-xl text-slate-900 uppercase tracking-tight">Order #{order.id}</h3>
+                            <h3 className="font-black text-xl text-slate-900 uppercase tracking-tight">Order #{order.orderId || order.id}</h3>
                             <ChevronRight size={18} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
                         </div>
+                        <p className="text-slate-600 font-semibold text-sm mb-1">{order.productTitle}</p>
                         <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">{formatDate(order.date)}</p>
                       </div>
                     </div>
@@ -99,7 +130,7 @@ const OrderHistory = () => {
                     </div>
                     <div className="bg-slate-50/50 p-4 rounded-2xl">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Item Count</p>
-                      <p className="font-black text-lg text-slate-700">01 Qty</p>
+                      <p className="font-black text-lg text-slate-700">{String(order.quantity || 1).padStart(2, '0')} Qty</p>
                     </div>
                     <div className="hidden sm:block bg-slate-50/50 p-4 rounded-2xl">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Payment</p>
@@ -127,16 +158,27 @@ const OrderHistory = () => {
         {activeTab === 'bids' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {bids.length > 0 ? bids.map((bid, index) => (
-              <div key={index} className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 hover:shadow-xl transition-all group overflow-hidden relative">
+              <div 
+                key={index} 
+                onClick={() => navigate(`/products/${bid.productId}`)}
+                className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 hover:shadow-xl transition-all group overflow-hidden relative cursor-pointer"
+              >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700 opacity-50"></div>
                 
                 <div className="flex flex-col md:flex-row md:items-center gap-6 relative z-10">
-                  <div className="bg-amber-50 p-5 rounded-[1.8rem] h-fit w-fit shadow-inner">
-                    <Gavel size={32} className="text-amber-500" />
-                  </div>
+                  {bid.productImage && (
+                    <div className="w-24 h-24 bg-slate-50 rounded-[1.8rem] overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+                      <img src={bid.productImage} alt={bid.productTitle} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  {!bid.productImage && (
+                    <div className="bg-amber-50 p-5 rounded-[1.8rem] h-fit w-fit shadow-inner">
+                      <Gavel size={32} className="text-amber-500" />
+                    </div>
+                  )}
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <h3 className="font-black text-2xl text-slate-900 tracking-tight">Luxury Watch Auction</h3>
+                      <h3 className="font-black text-2xl text-slate-900 tracking-tight">{bid.productTitle}</h3>
                       <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm ${getStatusColor(bid.status)}`}>
                         {bid.status}
                       </span>
@@ -146,18 +188,18 @@ const OrderHistory = () => {
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Your Highest Bid</p>
                             <p className="text-2xl font-black text-blue-600">{formatLKR(bid.bidAmount)}</p>
                         </div>
-                        <div className="flex items-center gap-3 bg-slate-50 px-6 py-3 rounded-2xl h-fit">
-                            <Clock size={20} className="text-amber-500 animate-pulse" />
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ending In</p>
-                                <p className="text-slate-900 font-black text-sm">2d 14h 30m</p>
-                            </div>
-                        </div>
+                        {bid.status === 'ACTIVE' && (
+                          <div className="flex items-center gap-3 bg-slate-50 px-6 py-3 rounded-2xl h-fit">
+                              <Clock size={20} className="text-amber-500 animate-pulse" />
+                              <div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ending In</p>
+                                  <p className="text-slate-900 font-black text-sm">2d 14h 30m</p>
+                              </div>
+                          </div>
+                        )}
                     </div>
                   </div>
-                  <button onClick={() => navigate('/products')} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-600 transition-colors shadow-lg shadow-slate-200">
-                    Outbid
-                  </button>
+                  <ChevronRight size={24} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
                 </div>
               </div>
             )) : (
