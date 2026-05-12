@@ -32,7 +32,6 @@ const SellerDashboard = () => {
   const [rejectingOrder, setRejectingOrder] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  // 🔥 SAFE DATA LOAD
   useEffect(() => {
     const loadDashboard = async () => {
       if (!user) return;

@@ -7,9 +7,7 @@ import vau.ac.lk.backend.models.enums.UserRole;
 import vau.ac.lk.backend.models.support.Business;
 import vau.ac.lk.backend.repositories.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
