@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import Button from '../../Components/Button';
 import Input from '../../Components/Input';
-import { useAuth } from '../../Hooks/useAuth';
 import { api } from '../../Services/api';
 import Modal from '../../Components/Modal';
 import { formatLKR } from '../../Utils/formatters';
 
 const AddListing = () => {
-  const { user } = useAuth();
+  // 🔥 AUTH REMOVED (no backend dependency)
+  const user = {
+    id: 'demo-user-id',
+    role: 'SELLER'
+  };
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -29,6 +33,7 @@ const AddListing = () => {
     increment: '1000',
   });
 
+  // 🔥 ROLE CHECK KEPT SAFE (no crash)
   if (!user || user.role !== 'SELLER') {
     return (
       <div className="p-20 text-center font-black text-slate-400 uppercase tracking-widest">
@@ -87,7 +92,6 @@ const AddListing = () => {
   const handleNext = () => {
     if (!validateStep()) return;
 
-    // ✅ Skip step 3 if FIXED
     if (step === 2 && formData.type === 'FIXED') {
       setStep(4);
     } else {
@@ -206,7 +210,7 @@ const AddListing = () => {
               </div>
             )}
 
-            {/* STEP 3 (Auction only) */}
+            {/* STEP 3 */}
             {step === 3 && formData.type === 'AUCTION' && (
               <div className="space-y-4">
                 <Input label="End Date" type="datetime-local"

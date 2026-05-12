@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../Context/CartContext';
-import { useAuth } from '../../Hooks/useAuth';
 import { api } from '../../Services/api';
 import { ArrowLeft, CreditCard, Truck, Loader2, ShieldCheck } from 'lucide-react';
 import { formatLKR } from '../../Utils/formatters';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { cartItems, cartTotal, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
