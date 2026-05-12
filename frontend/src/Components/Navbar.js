@@ -17,13 +17,11 @@ const Navbar = () => {
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
 
-  // ✅ Get user from localStorage
   const user = JSON.parse(localStorage.getItem("user"));
   const isLoggedIn = !!user;
   const userRole = user?.role || 'BUYER';
   const wishlistCount = wishlist.length;
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -49,7 +47,7 @@ const Navbar = () => {
   const logout = () => {
     localStorage.removeItem("user");
     setIsMenuOpen(false);
-    navigate('/login');
+    navigate('/');
     window.location.reload(); // refresh UI state
   };
 
