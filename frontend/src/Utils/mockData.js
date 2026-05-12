@@ -62,7 +62,7 @@ export const mockProducts = [
     type: "FIXED", 
     price: 34300, 
     stock: 12, 
-    img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400", 
+    img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400", 
     description: "Industry-leading noise canceling with Dual Noise Sensor technology", 
     status: "ACTIVE" 
   },
@@ -77,7 +77,7 @@ export const mockProducts = [
     currentBid: 18500, 
     bids: 23, 
     endTime: "2026-12-20T15:00:00Z", 
-    img: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400", 
+    img: "https://images.unsplash.com/photo-1606728035253-49e8a23146de?w=400", 
     status: "ACTIVE",
     description: "Classic 35mm film camera in excellent working condition."
   },
@@ -89,7 +89,7 @@ export const mockProducts = [
     type: "FIXED", 
     price: 21000, 
     stock: 8, 
-    img: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400", 
+    img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400", 
     description: "5.1 channel wireless home theater system with deep bass",
     status: "ACTIVE" 
   },
@@ -101,7 +101,7 @@ export const mockProducts = [
     type: "FIXED", 
     price: 15500, 
     stock: 15, 
-    img: "https://images.unsplash.com/photo-1526006002017-865a5c2d2212?w=400", 
+    img: "https://images.unsplash.com/photo-1523044008490-7ab8e2aa85be?w=400", 
     description: "Waterproof 4K action camera with image stabilization",
     status: "ACTIVE" 
   },
@@ -113,7 +113,7 @@ export const mockProducts = [
     type: "FIXED", 
     price: 12800, 
     stock: 25, 
-    img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400", 
+    img: "https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=400", 
     description: "Active noise cancellation with 24-hour battery life",
     status: "ACTIVE" 
   },
@@ -186,7 +186,7 @@ export const mockProducts = [
     description: "Collection of 5 rare vintage rock band t-shirts"
   },
 
-  // ===== HOME & LIVING (5 products) =====
+  // ===== HOME & LIVING (10 products) =====
   { 
     id: 11, 
     title: "Ergonomic Office Chair", 
@@ -252,6 +252,66 @@ export const mockProducts = [
     img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400", 
     status: "ACTIVE",
     description: "Set of 3 modern designer lamps with adjustable brightness"
+  },
+  { 
+    id: 31, 
+    title: "Stainless Steel Kitchen Cookware Set", 
+    sellerId: 2, 
+    category: "Home & Living", 
+    type: "FIXED", 
+    price: 28500, 
+    stock: 8, 
+    img: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400", 
+    description: "12-piece professional cookware set with non-stick coating",
+    status: "ACTIVE" 
+  },
+  { 
+    id: 32, 
+    title: "Decorative Wall Art Canvas Set", 
+    sellerId: 2, 
+    category: "Home & Living", 
+    type: "FIXED", 
+    price: 15800, 
+    stock: 15, 
+    img: "https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=400", 
+    description: "3-panel abstract canvas wall art for living room",
+    status: "ACTIVE" 
+  },
+  { 
+    id: 33, 
+    title: "Velvet Throw Pillows Set of 4", 
+    sellerId: 2, 
+    category: "Home & Living", 
+    type: "FIXED", 
+    price: 8200, 
+    stock: 25, 
+    img: "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=400", 
+    description: "Luxury velvet cushion covers in assorted colors",
+    status: "ACTIVE" 
+  },
+  { 
+    id: 34, 
+    title: "Bamboo Bathroom Storage Organizer", 
+    sellerId: 2, 
+    category: "Home & Living", 
+    type: "FIXED", 
+    price: 11400, 
+    stock: 12, 
+    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400", 
+    description: "3-tier bamboo storage shelf for bathroom essentials",
+    status: "ACTIVE" 
+  },
+  { 
+    id: 35, 
+    title: "Smart LED Floor Lamp - RGB", 
+    sellerId: 2, 
+    category: "Home & Living", 
+    type: "FIXED", 
+    price: 19800, 
+    stock: 10, 
+    img: "https://images.unsplash.com/photo-1550581190-9c1c48d21d6c?w=400", 
+    description: "App-controlled RGB floor lamp with 16 million colors",
+    status: "ACTIVE" 
   },
 
   // ===== GAMING (5 products) =====

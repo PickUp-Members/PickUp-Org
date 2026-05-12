@@ -21,7 +21,7 @@ const Home = () => {
   }, []);
 
   const handleCategoryClick = (category) => {
-    category === 'All Categories' ? navigate('/products') : navigate(`/products?category=${category}`);
+    category === 'All Categories' ? navigate('/products') : navigate(`/products?category=${encodeURIComponent(category)}`);
   };
 
   const categories = [
