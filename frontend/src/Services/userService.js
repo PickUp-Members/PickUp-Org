@@ -21,3 +21,49 @@ export const applySeller = async (userId, businessData) => {
         };
     }
 }
+
+/* Admin */
+// Get all pending requests
+export const getAllPendingRequests = async () => {
+    try {
+        const response = await axios.get(`${url}/getAllPendingRequests`);
+        return response.data;
+    }
+    catch (error) {
+        console.error("getAllPendingRequests error:", error.response?.data || error.message);
+        return {
+        success: false,
+        error: error.response?.data || "Server error",
+        };
+    }
+}
+
+// Approve Seller Request
+export const approveSellerRequest = async (userId) => {
+    try {
+        const response = await axios.patch(`${url}/approveSellerRequest/${userId}`);
+        return response.data;
+    }
+    catch (error) {
+        console.error("approveSellerRequest error:", error.response?.data || error.message);
+        return {
+        success: false,
+        error: error.response?.data || "Server error",
+        };
+    }
+}
+
+// Reject Seller Request
+export const rejectSellerRequest = async (userId) => {
+    try {
+        const response = await axios.patch(`${url}/rejectSellerRequest/${userId}`);
+        return response.data;
+    }
+    catch (error) {
+        console.error("rejectSellerRequest error:", error.response?.data || error.message);
+        return {
+        success: false,
+        error: error.response?.data || "Server error",
+        };
+    }
+}

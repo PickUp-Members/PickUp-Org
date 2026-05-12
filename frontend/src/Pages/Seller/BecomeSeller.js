@@ -8,11 +8,6 @@ import { applySeller } from '../../Services/userService';
 const BecomeSeller = () => {
   const user = JSON.parse(localStorage.getItem('user'));
 
-  const requestSellerAccess = async (payload) => {
-    console.log('Mock seller request:', payload);
-    return { success: true };
-  };
-
   const [formData, setFormData] = useState({
     businessName: '',
     description: '',

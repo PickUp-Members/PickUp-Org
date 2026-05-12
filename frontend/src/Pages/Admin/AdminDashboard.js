@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Search, AlertTriangle, Hammer, Zap, UserCheck, UserX, BarChart3, DollarSign, Eye, FileText, Calendar, Mail, Phone, Info } from 'lucide-react';
+import { Users, Search, AlertTriangle, Hammer, Zap, UserCheck, UserX, BarChart3, DollarSign, Eye, FileText, Mail, Phone, Info } from 'lucide-react';
 import { formatLKR, formatDate } from '../../Utils/formatters';
 import Button from '../../Components/Button';
 import Input from '../../Components/Input';
 import Modal from '../../Components/Modal';
-import { useAuthStore } from '../../store/authStore';
+import { getAllPendingRequests, approveSellerRequest, rejectSellerRequest } from '../../Services/userService';
 
 const AdminDashboard = () => {
 
   const [activeTab, setActiveTab] = useState('stats');
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const [requests, setRequests] = useState([]);
   const [disputes, setDisputes] = useState([]);
@@ -22,86 +23,69 @@ const AdminDashboard = () => {
 
   const [selectedRequest, setSelectedRequest] = useState(null);
 
-  // ================= FIXED ZUSTAND SELECTORS =================
-  const getAllSellerRequests = useAuthStore(
-    state => state.getAllSellerRequests
-  );
+  const loadSellerRequests = async () => {
+    try {
+      setLoading(true);
+      const result = await getAllPendingRequests();
 
-  const approveSeller = useAuthStore(
-    state => state.approveSeller
-  );
-
-  const rejectSeller = useAuthStore(
-    state => state.rejectSeller
-  );
-
-  const loading = useAuthStore(
-    state => state.loading
-  );
-
-  // ================= LOAD SELLER REQUESTS =================
-  useEffect(() => {
-
-    if (activeTab !== 'sellers') return;
-
-    const loadSellerRequests = async () => {
-
-      try {
-
-        const result = await getAllSellerRequests();
-
-        if (result.success) {
-          setRequests(result.requests || []);
-        } 
-        else {
-          console.error(result.error);
-        }
-
-      } 
-      catch (err) {
-        console.error(err);
+      if (result) {
+        setRequests(result);
       }
-    };
+      else {
+        console.error("Failed to load requests");
+      }
+
+    }
+    catch (error) {
+      console.error("Error loading seller requests:", error);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab !== 'sellers') {
+      return;
+    }
 
     loadSellerRequests();
-
   }, [activeTab]);
 
   // ================= APPROVE SELLER =================
   const handleApproveSeller = async (userId) => {
+    try {
+      const result = await approveSellerRequest(userId);
 
-    const result = await approveSeller(userId);
-
-    if (result.success) {
-
-      setRequests((prev) =>
-        prev.filter((req) => req.id !== userId)
-      );
+      if (result) {
+        setRequests((prev) => prev.filter((r) => r.id !== userId));
+      }
 
       setSelectedRequest(null);
 
-    } 
-    else {
-      console.error(result.error);
+      alert("Seller approved successfully");
+    }
+    catch (error) {
+      console.error("Approve seller error:", error);
+      alert("Server error");
     }
   };
 
-  // ================= REJECT SELLER =================
   const handleRejectSeller = async (userId) => {
+    try {
+      const result = await rejectSellerRequest(userId);
 
-    const result = await rejectSeller(userId);
-
-    if (result.success) {
-
-      setRequests((prev) =>
-        prev.filter((req) => req.id !== userId)
-      );
+      if (result) {
+        setRequests((prev) => prev.filter((r) => r.id !== userId));
+      }
 
       setSelectedRequest(null);
 
-    } 
-    else {
-      console.error(result.error);
+      alert("Seller rejected successfully");
+    }
+    catch (error) {
+      console.error("Reject seller error:", error);
+      alert("Server error");
     }
   };
 
