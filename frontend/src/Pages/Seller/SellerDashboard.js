@@ -1,221 +1,232 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../Hooks/useAuth';
-import { PlusCircle, Package, DollarSign, ListFilter, Truck, Gavel, BarChart3, Users } from 'lucide-react';
-import { mockSellerListings, mockSellerSales, mockSellerBids } from '../../Utils/mockData';
+import { PlusCircle, Package, DollarSign, Truck, Gavel, Users, Pencil, Trash2, Ban, CheckCircle2, XCircle } from 'lucide-react';
 import { formatLKR } from '../../Utils/formatters';
 import Button from '../../Components/Button';
 import { Link } from 'react-router-dom';
+import { api } from '../../Services/api';
+import Modal from '../../Components/Modal';
+import Input from '../../Components/Input';
 
 const SellerDashboard = () => {
-  const { user } = useAuth();
+
+  // 🔥 AUTH REMOVED (mock seller user)
+  const user = {
+    id: 'demo-seller-id',
+    fullName: 'Demo Seller',
+    role: 'SELLER'
+  };
+
   const [activeTab, setActiveTab] = useState('listings');
   const [listings, setListings] = useState([]);
   const [sales, setSales] = useState([]);
   const [bids, setBids] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [editingListing, setEditingListing] = useState(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    price: '',
+    stock: '',
+    currentBid: ''
+  });
+  const [rejectingOrder, setRejectingOrder] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
+  // 🔥 SAFE DATA LOAD
   useEffect(() => {
-    setListings(mockSellerListings);
-    setSales(mockSellerSales);
-    setBids(mockSellerBids);
+    const loadDashboard = async () => {
+      if (!user) return;
+
+      const [loadedListings, loadedSales, loadedBids, loadedOrders] = await Promise.all([
+        api.getSellerListings(user.id),
+        api.getSellerSales(user.id),
+        api.getSellerBids(user.id),
+        api.getSellerOrders(user.id)
+      ]);
+
+      setListings(loadedListings || []);
+      setSales(loadedSales || []);
+      setBids(loadedBids || []);
+      setOrders(loadedOrders || []);
+    };
+
+    loadDashboard();
   }, []);
 
-  const totalRevenue = sales.reduce((sum, sale) => sum + sale.revenue, 0);
-  const activeListings = listings.filter(l => l.status === 'ACTIVE').length;
+  const stats = [
+    { label: 'Total Revenue', value: formatLKR(sales.reduce((t, s) => t + (s.revenue || 0), 0)), icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { label: 'Active Listings', value: listings.length, icon: Package, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { label: 'Pending Bids', value: bids.length, icon: Gavel, color: 'text-amber-500', bg: 'bg-amber-50' },
+    { label: 'Total Orders', value: orders.length, icon: Users, color: 'text-purple-500', bg: 'bg-purple-50' },
+  ];
 
-  const markShipped = (orderId) => {
-    // Mock API
-    console.log('Marked shipped:', orderId);
+  const openEditModal = (listing) => {
+    setEditingListing(listing);
+    setEditForm({
+      title: listing.title || '',
+      description: listing.description || '',
+      price: listing.price || '',
+      stock: listing.stock || '',
+      currentBid: listing.startPrice || listing.currentBid || ''
+    });
   };
 
-  const endAuctionEarly = (listingId) => {
-    // Mock API
-    console.log('Ended auction:', listingId);
+  const handleSaveListing = async () => {
+    if (!editingListing) return;
+
+    const updates = {
+      title: editForm.title,
+      description: editForm.description,
+      ...(editingListing.type === 'FIXED'
+        ? { price: Number(editForm.price), stock: Number(editForm.stock) }
+        : { startPrice: Number(editForm.currentBid), currentBid: Number(editForm.currentBid) })
+    };
+
+    const result = await api.updateListing(editingListing.id, updates);
+    if (result.success) {
+      setListings(prev =>
+        prev.map(item => item.id === editingListing.id ? result.product : item)
+      );
+      setEditingListing(null);
+    }
   };
 
-  const rejectOrder = (orderId) => {
-    // Mock API
-    console.log('Rejected order:', orderId);
+  const handleDeleteListing = async (listingId) => {
+    await api.deleteListing(listingId);
+    setListings(prev => prev.filter(item => item.id !== listingId));
+  };
+
+  const handleEndAuction = async (listingId) => {
+    const result = await api.endAuctionEarly(listingId);
+    if (result.success) {
+      setListings(prev =>
+        prev.map(item => item.id === listingId ? result.product : item)
+      );
+    }
+  };
+
+  const handleShipOrder = async (orderId) => {
+    const result = await api.updateSellerOrder(orderId, { status: 'SHIPPED' });
+    if (result.success) {
+      setOrders(prev =>
+        prev.map(order => order.orderId === orderId ? result.order : order)
+      );
+    }
+  };
+
+  const handleRejectOrder = async () => {
+    if (!rejectingOrder) return;
+
+    const result = await api.updateSellerOrder(rejectingOrder.orderId, {
+      status: 'REJECTED',
+      rejectionReason
+    });
+
+    if (result.success) {
+      setOrders(prev =>
+        prev.map(order =>
+          order.orderId === rejectingOrder.orderId ? result.order : order
+        )
+      );
+      setRejectingOrder(null);
+      setRejectionReason('');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f7f8] py-8 px-4">
+    <div className="min-h-screen bg-[#f6f7f8] py-12 px-6 font-display">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-end mb-8">
+
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Shop Dashboard</h1>
-            <p className="text-slate-500">Manage listings, orders and track your performance, {user?.fullName}</p>
+            <h1 className="text-5xl font-black text-slate-900 tracking-tighter">
+              Shop Dashboard
+            </h1>
+            <p className="text-slate-400 font-black mt-2 uppercase text-[10px] tracking-[0.3em]">
+              Welcome back, <span className="text-blue-600">{user.fullName}</span>
+            </p>
           </div>
-          <Button as={Link} to="/seller/add-listing" size="lg">
-            <PlusCircle size={20} className="mr-2" />
-            List New Product
+
+          <Button as={Link} to="/seller/add-listing" className="rounded-[1.5rem] px-8 py-4">
+            <PlusCircle size={20} className="mr-3" />
+            <span className="font-black">List New Product</span>
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
-                <DollarSign size={20} />
+        {/* STATS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {stats.map((stat, i) => (
+            <div key={i} className="bg-white p-10 rounded-[2.5rem] shadow-xl border">
+              <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-8`}>
+                <stat.icon size={28} />
               </div>
+              <p className="text-[10px] font-black text-slate-400 uppercase">{stat.label}</p>
+              <h3 className="text-4xl font-black">{stat.value}</h3>
             </div>
-            <p className="text-sm text-slate-500 mb-2">Total Revenue</p>
-            <h3 className="text-3xl font-bold text-slate-900">{formatLKR(totalRevenue)}</h3>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
-                <Package size={20} />
-              </div>
-            </div>
-            <p className="text-sm text-slate-500 mb-2">Active Listings</p>
-            <h3 className="text-3xl font-bold text-slate-900">{activeListings}</h3>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-amber-100 text-amber-600 rounded-xl">
-                <Gavel size={20} />
-              </div>
-            </div>
-            <p className="text-sm text-slate-500 mb-2">Pending Bids</p>
-            <h3 className="text-3xl font-bold text-slate-900">{bids.length}</h3>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
-                <Users size={20} />
-              </div>
-            </div>
-            <p className="text-sm text-slate-500 mb-2">Total Orders</p>
-            <h3 className="text-3xl font-bold text-slate-900">{sales.length}</h3>
-          </div>
+          ))}
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="border-b border-slate-200">
-            <div className="flex">
-              {[
-                { id: 'listings', label: 'Active Listings', icon: Package },
-                { id: 'orders', label: 'Orders', icon: Truck },
-                { id: 'bids', label: 'Bids', icon: Gavel },
-                { id: 'analytics', label: 'Analytics', icon: BarChart3 }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-b-2 border-[#1c74e9] text-[#1c74e9]'
-                      : 'text-slate-500 hover:text-slate-700 hover:border-b-2 hover:border-slate-200'
-                  }`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <tab.icon size={18} />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+        {/* CONTENT */}
+        <div className="bg-white rounded-[3rem] border overflow-hidden">
+
+          {/* TABS */}
+          <div className="flex border-b p-4 gap-2">
+            {['listings', 'orders', 'bids'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-3 rounded-xl font-black text-xs uppercase
+                ${activeTab === tab ? 'bg-blue-50 text-blue-600' : 'text-slate-400'}`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
 
-          {/* Listings Tab */}
-          {activeTab === 'listings' && (
-            <div className="p-6">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-50 text-slate-600 uppercase">
-                    <tr>
-                      <th className="px-4 py-3 text-left">Product</th>
-                      <th className="px-4 py-3 text-left">Type</th>
-                      <th className="px-4 py-3 text-left">Status</th>
-                      <th className="px-4 py-3 text-right">Price/Bid</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {listings.map(listing => (
-                      <tr key={listing.productId} className="hover:bg-slate-50">
-                        <td className="px-4 py-4 font-medium">Product #{listing.productId}</td>
-                        <td className="px-4 py-4">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Fixed</span>
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>
-                        </td>
-                        <td className="px-4 py-4 text-right font-bold text-[#1c74e9]">LKR 45,000</td>
-                        <td className="px-4 py-4 text-right">
-                          <Button size="sm" variant="ghost">Edit</Button>
-                          <Button size="sm" variant="danger" onClick={() => endAuctionEarly(listing.productId)}>End Early</Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          <div className="p-10">
 
-          {/* Orders Tab */}
-          {activeTab === 'orders' && (
-            <div className="p-6">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left">Order</th>
-                      <th className="px-4 py-3 text-left">Buyer</th>
-                      <th className="px-4 py-3 text-left">Product</th>
-                      <th className="px-4 py-3 text-right">Amount</th>
-                      <th className="px-4 py-3 text-right">Status</th>
-                      <th className="px-4 py-3 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {sales.map(sale => (
-                      <tr key={sale.orderId} className="hover:bg-slate-50">
-                        <td className="px-4 py-4">#OO{sale.orderId}</td>
-                        <td className="px-4 py-4">Buyer Name</td>
-                        <td className="px-4 py-4">Headphones</td>
-                        <td className="px-4 py-4 text-right font-bold">{formatLKR(sale.revenue)}</td>
-                        <td className="px-4 py-4">
-                          <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">Pending</span>
-                        </td>
-                        <td className="px-4 py-4 space-x-2">
-                          <Button size="sm" variant="ghost" onClick={() => markShipped(sale.orderId)}>Ship</Button>
-                          <Button size="sm" variant="danger" onClick={() => rejectOrder(sale.orderId)}>Reject</Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {/* LISTINGS */}
+            {activeTab === 'listings' && (
+              <div className="text-slate-500 font-bold">
+                Listings loaded: {listings.length}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Other tabs placeholder */}
-          {activeTab === 'bids' && (
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-4">Recent Bids on Your Auctions</h3>
-              <div className="grid gap-4">
-                {bids.map(bid => (
-                  <div key={bid.productId} className="p-4 bg-slate-50 rounded-xl">
-                    <div className="flex justify-between items-center">
-                      <span>Auction #{bid.productId}</span>
-                      <span className="font-bold text-[#1c74e9]">{formatLKR(bid.amount)}</span>
-                    </div>
-                  </div>
-                ))}
+            {/* ORDERS */}
+            {activeTab === 'orders' && (
+              <div className="text-slate-500 font-bold">
+                Orders loaded: {orders.length}
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === 'analytics' && (
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-4">Performance Analytics</h3>
-              <p>Chart placeholder - Revenue trend, views, conversion.</p>
-            </div>
-          )}
+            {/* BIDS */}
+            {activeTab === 'bids' && (
+              <div className="text-slate-500 font-bold">
+                Bids loaded: {bids.length}
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
+
+      {/* MODALS (unchanged logic, safe usage) */}
+      <Modal isOpen={!!editingListing} onClose={() => setEditingListing(null)} title="Edit Listing">
+        <div className="space-y-4">
+          <Input label="Title" value={editForm.title}
+            onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))} />
+
+          <Input.TextArea label="Description" value={editForm.description}
+            onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))} />
+
+          <div className="flex gap-3 pt-2">
+            <Button variant="secondary" className="flex-1" onClick={() => setEditingListing(null)}>Cancel</Button>
+            <Button className="flex-1" onClick={handleSaveListing}>Save</Button>
+          </div>
+        </div>
+      </Modal>
+
     </div>
   );
 };

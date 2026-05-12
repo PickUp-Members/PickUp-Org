@@ -1,32 +1,46 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../Hooks/useAuth';
 import logo from '../../assets/logo.png';
+import { loginUser } from '../../Services/authService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleLogin = async (event) => {
+    event.preventDefault();
     setError('');
 
-    const result = await login(email, password);
-    
-    if (result.success) {
-      if (result.user.role === 'ADMIN') navigate('/admin/dashboard');
-      else if (result.user.role === 'SELLER') navigate('/seller/dashboard');
-      else navigate('/');
-    } else {
-      setError(result.error);
+    try {
+      setLoading(true);
+
+      const user = await loginUser(email, password);
+      console.log(user);
+
+      localStorage.setItem('user', JSON.stringify(user));
+
+      if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      }
+      else if (user.role === 'SELLER') {
+        navigate('/seller/dashboard');
+      }
+      else {
+        navigate('/');
+      }
     }
-    setLoading(false);
-  };
+    catch (error) {
+      console.log(error);
+      setError(error.response?.data?.message || 'Invalid email or password.');
+    }
+    finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f6f7f8] py-12 px-4 sm:px-6 lg:px-8 font-display">
