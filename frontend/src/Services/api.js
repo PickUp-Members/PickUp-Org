@@ -6,7 +6,8 @@ import {
   mockPlatformStats,
   mockDisputes,
   mockSellerSales,
-  mockSellerBids
+  mockSellerBids,
+  mockBuyerOrders
 } from '../Utils/mockData';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -17,6 +18,7 @@ let sellerRequests = [...mockSellerRequests];
 let disputes = [...mockDisputes];
 let sellerSales = [...mockSellerSales];
 let sellerBids = [...mockSellerBids];
+let buyerOrders = [...mockBuyerOrders];
 let sellerOrders = [
   {
     id: 'ORD-120501',
@@ -136,11 +138,38 @@ export const api = {
 
   placeOrder: async (orderData) => {
     await delay(1200);
+    
+    const orderId = `ORD-${Date.now().toString().slice(-6)}`;
+    const currentDate = new Date().toISOString().slice(0, 10);
+    
+    // Create order for each cart item
+    orderData.items.forEach(item => {
+      const newOrder = {
+        id: buyerOrders.length + 1,
+        orderId: orderId,
+        productId: item.productId,
+        productTitle: item.title,
+        image: item.img,
+        status: 'PENDING',
+        total: item.price * item.quantity,
+        quantity: item.quantity,
+        date: currentDate,
+        shippingDetails: orderData.shippingDetails,
+        paymentMethod: 'Cash on Delivery'
+      };
+      buyerOrders.push(newOrder);
+    });
+    
     return { 
       success: true, 
-      orderId: `ORD-${Date.now().toString().slice(-6)}`,
+      orderId: orderId,
       message: "Order placed successfully!" 
     };
+  },
+
+  getBuyerOrders: async () => {
+    await delay(300);
+    return clone(buyerOrders);
   },
 
   createListing: async (listingData, sellerId) => {
