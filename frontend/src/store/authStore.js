@@ -5,24 +5,15 @@ const API = axios.create({
     baseURL: 'http://localhost:8080/api'
 });
 
-API.interceptors.request.use((config) => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.token) {
-        config.headers.Authorization = `Bearer ${user.token}`;
-    }
-    return config;
-});
-
 API.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
             console.warn('Unauthorized! Logging out...');
-
             localStorage.removeItem('user');
-
             window.location.href = '/login';
         }
+        return Promise.reject(error);
     }
 );
 
@@ -31,6 +22,7 @@ export const useAuthStore = create((set) => ({
     loading: false,
     error: null,
 
+    /* User - Buyers */
     // ================= REGISTER =================
     register: async (userData) => {
         set({ loading: true, error: null });
@@ -115,6 +107,88 @@ export const useAuthStore = create((set) => ({
                 success: false,
                 error: err.response?.data || 'Seller request failed'
             };
+        }
+    },
+
+    /* User - Admin */
+    // ================= GET ALL SELLER REQUEST =================
+    getAllSellerRequests: async () => {
+        set({ loading: true });
+
+        const { user } = useAuthStore.getState();
+        
+        try {
+            const res = await API.get('/admin/seller-requests',
+                {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`
+                    }
+                }
+            );
+
+            set({ loading: false });
+
+            return {
+                success: true,
+                requests: res.data
+            }
+        }
+        catch (err) {
+            console.error(err);
+            set({ loading: false });
+
+            return {
+                success: false,
+                error: err.response?.data || 'Failed to fetch seller requests'
+            }
+        }
+    },
+
+    // ================= APPROVE SELLER REQUEST =================
+    approveSeller: async (userId) => {
+        const { user } = useAuthStore.getState();
+
+        try {
+           const res = await API.patch(`/admin/approve-seller/${userId}`,
+            {},
+            {
+                headers: { Authorization: `Bearer ${user.token}` }
+            }
+           );
+            return {
+                success: true,
+                user: res.data
+            };
+        }
+        catch (err) {
+            return {
+                success: false,
+                error: err.response?.data || 'Failed to approve seller'
+            };
+        }
+    },
+
+    // ================= REJECT SELLER REQUEST =================
+    rejectSeller: async (userId) => {
+        const { user } = useAuthStore.getState();
+
+        try {
+            const res = await API.patch(`/admin/reject-seller/${userId}`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${user.token}` }
+                }
+            );
+            return {
+                success: true,
+                user: res.data
+            };
+        }
+        catch (err) {
+            return {
+                success: false,
+                error: err.response?.data || 'Failed to reject seller'
+            }
         }
     }
 }));

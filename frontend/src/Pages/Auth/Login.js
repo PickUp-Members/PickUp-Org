@@ -1,31 +1,44 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../Hooks/useAuth';
 import logo from '../../assets/logo.png';
+import { loginUser } from '../../Services/authService';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const { login, loading, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (event) => {
     event.preventDefault();
     setError('');
 
-    const result = await login(email, password);
+    try {
+      setLoading(true);
 
-    if (result.success) {
-      const userRole = result.user?.role;
+      const user = await loginUser(email, password);
+      console.log(user);
 
-      if (userRole === 'ADMIN') navigate('/admin/dashboard');
-      else if (userRole === 'SELLER') navigate('/seller/dashboard');
-      else navigate('/');
+      localStorage.setItem('user', JSON.stringify(user));
+
+      if (user.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      }
+      else if (user.role === 'SELLER') {
+        navigate('/seller/dashboard');
+      }
+      else {
+        navigate('/');
+      }
     }
-    else {
-      setError(result.error || 'Invalid email or password. Please try again.');
+    catch (error) {
+      console.log(error);
+      setError(error.response?.data?.message || 'Invalid email or password.');
+    }
+    finally {
+      setLoading(false);
     }
   }
 

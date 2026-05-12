@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
-import { useAuth } from '../../Hooks/useAuth';
-import { useAuthStore } from '../../store/authStore'
+import { registerUser } from '../../Services/authService';
 
 const Register = () => {
   const navigate = useNavigate();
-
-  const { register, loading } = useAuthStore();
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -27,23 +25,35 @@ const Register = () => {
       return;
     }
 
-    if (formData.password != formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    const result = await register({
-      fullName: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      role: 'BUYER'
-    });
+    try {
+      setLoading(true);
 
-    if (result.success) {
-      navigate('/login');
+      const result = await registerUser({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: 'BUYER'
+      });
+
+      console.log(result);
+
+      navigate(('/login'));
     }
-    else {
-      setError(result.error || 'Unable to create your account right now.');
+    catch (error) {
+      console.error(error);
+
+      setError(
+        error.response?.data?.message ||
+        'Unable to create your account right now. Please try again later.'
+      );
+    }
+    finally {
+      setLoading(false);
     }
   };
 
