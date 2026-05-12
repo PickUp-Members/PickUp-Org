@@ -17,13 +17,16 @@ public class Order {
     private String sellerId;
     private List<OrderItem> items;
     private Double totalAmount;
-    private OrderStatus status = OrderStatus.PENDING;
+    private OrderStatus status;
     private String shippingAddress;
     private String paymentStatus;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     /* Constructors */
+    // No Arg Constructor
     public Order() {}
+
+    // All Arg Constructors
     public Order(String id, String buyerId, String sellerId, List<OrderItem> items, Double totalAmount, OrderStatus status, String shippingAddress, String paymentStatus, LocalDateTime createdAt) {
         this.id = id;
         this.buyerId = buyerId;
@@ -36,12 +39,12 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    /* id */
+    // String id
     public String getId() {
         return id;
     }
 
-    /* buyerId */
+    // String buyerId
     public String getBuyerId() {
         return buyerId;
     }
@@ -49,7 +52,7 @@ public class Order {
         this.buyerId = buyerId;
     }
 
-    /* sellerId */
+    // String sellerId
     public String getSellerId() {
         return sellerId;
     }
@@ -57,7 +60,7 @@ public class Order {
         this.sellerId = sellerId;
     }
 
-    /* items */
+    // List<OrderItem> items
     public List<OrderItem> getItems() {
         return items;
     }
@@ -65,7 +68,7 @@ public class Order {
         this.items = items;
     }
 
-    /* totalAmount */
+    // Double totalAmount
     public Double getTotalAmount() {
         return totalAmount;
     }
@@ -73,7 +76,7 @@ public class Order {
         this.totalAmount = totalAmount;
     }
 
-    /* status */
+    // OrderStatus status
     public OrderStatus getStatus() {
         return status;
     }
@@ -81,7 +84,7 @@ public class Order {
         this.status = status;
     }
 
-    /* shippingAddress */
+    // String shippingAddress
     public String getShippingAddress() {
         return shippingAddress;
     }
@@ -89,7 +92,7 @@ public class Order {
         this.shippingAddress = shippingAddress;
     }
 
-    /* paymentStatus */
+    // String paymentStatus
     public String getPaymentStatus() {
         return paymentStatus;
     }
@@ -97,7 +100,7 @@ public class Order {
         this.paymentStatus = paymentStatus;
     }
 
-    /* createdAt */
+    // LocalDateTime createdAt
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

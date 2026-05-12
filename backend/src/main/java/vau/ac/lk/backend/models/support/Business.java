@@ -7,7 +7,9 @@ public class Business {
     private String documents;
 
     /* Constructors */
+    // No Arg Constructor
     public Business() {}
+    // All Arg Constructor
     public Business(String name, String description, String contactPhone, String documents) {
         this.name = name;
         this.description = description;
@@ -15,7 +17,7 @@ public class Business {
         this.documents = documents;
     }
 
-    /* name */
+    // String - name
     public String getName() {
         return name;
     }
@@ -23,7 +25,7 @@ public class Business {
         this.name = name;
     }
 
-    /* description */
+    // String - description
     public String getDescription() {
         return description;
     }
@@ -31,7 +33,7 @@ public class Business {
         this.description = description;
     }
 
-    /* contactPhone */
+    // String - contactPhone
     public String getContactPhone() {
         return contactPhone;
     }
@@ -39,7 +41,7 @@ public class Business {
         this.contactPhone = contactPhone;
     }
 
-    /* businessRegistrationNo */
+    // String - documents
     public String getDocuments() {
         return documents;
     }

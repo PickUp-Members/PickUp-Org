@@ -6,8 +6,10 @@ public class OrderItem {
     private Integer quantity;
     private Double pricePurchase;
 
-    /*  */
+    /* Constructors */
+    // No arg Constructors
     public OrderItem() {}
+    // All Arg Constructors
     public OrderItem(String productId, String productTitle, Integer quantity, Double pricePurchase) {
         this.productId = productId;
         this.productTitle = productTitle;
@@ -15,7 +17,7 @@ public class OrderItem {
         this.pricePurchase = pricePurchase;
     }
 
-    /* productId */
+    // String - productId
     public String getProductId() {
         return productId;
     }
@@ -23,7 +25,7 @@ public class OrderItem {
         this.productId = productId;
     }
 
-    /* productTitle */
+    // String - productTitle
     public String getProductTitle() {
         return productTitle;
     }
@@ -31,7 +33,7 @@ public class OrderItem {
         this.productTitle = productTitle;
     }
 
-    /* quantity */
+    // Integer - quantity
     public Integer getQuantity() {
         return quantity;
     }
@@ -39,7 +41,7 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
-    /* pricePurchase */
+    // Double - pricePurchase
     public Double getPricePurchase() {
         return pricePurchase;
     }

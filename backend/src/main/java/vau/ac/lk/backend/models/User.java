@@ -29,7 +29,9 @@ public class User {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     /* Constructors */
+    // No Arg Constructor
     public User() {}
+    // All Arg Constructor
     public User(String id, String email, String password, String fullName, UserRole role, String profilePic, List<Address> addresses, RequestStatus sellerRequestStatus, Business businessDetails, LocalDateTime createdAt) {
         this.id = id;
         this.email = email;

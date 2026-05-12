@@ -8,7 +8,9 @@ public class Address {
     private boolean isDefault;
 
     /* Constructors */
+    // No Arg
     public Address() {}
+    // All Arg
     public Address(String street, String city, String province, String zipCode, boolean isDefault) {
         this.street = street;
         this.city = city;
@@ -17,7 +19,7 @@ public class Address {
         this.isDefault = isDefault;
     }
 
-    /* street */
+    // String - street
     public String getStreet() {
         return street;
     }
@@ -25,7 +27,7 @@ public class Address {
         this.street = street;
     }
 
-    /* city */
+    // String - city
     public String getCity() {
         return city;
     }
@@ -33,7 +35,7 @@ public class Address {
         this.city = city;
     }
 
-    /* province */
+    // String - province
     public String getProvince() {
         return province;
     }
@@ -41,7 +43,7 @@ public class Address {
         this.province = province;
     }
 
-    /* zipCode */
+    // String - zipCode
     public String getZipCode() {
         return zipCode;
     }
@@ -49,11 +51,11 @@ public class Address {
         this.zipCode = zipCode;
     }
 
-    /* isDefault */
-    public boolean getIsDefault() {
+    // boolean - isDefault
+    public boolean isDefault() {
         return isDefault;
     }
-    public void setIsDefault(boolean isDefault) {
-        this.isDefault = isDefault;
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
     }
 }

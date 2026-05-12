@@ -1,6 +1,5 @@
 package vau.ac.lk.backend.models;
 
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,22 +15,12 @@ public class Bid {
     private Double bidAmount;
     private LocalDateTime bidTime = LocalDateTime.now();
 
-    /* Constructors */
-    public Bid() {}
-    public Bid(String id, String productId, String bidderId, Double bidAmount, LocalDateTime bidTime) {
-        this.id = id;
-        this.productId = productId;
-        this.bidderId = bidderId;
-        this.bidAmount = bidAmount;
-        this.bidTime = bidTime;
-    }
-
-    /* Id */
+    // String - id
     public String getId() {
         return id;
     }
 
-    /* productId */
+    // String - productId
     public String getProductId() {
         return productId;
     }
@@ -39,7 +28,7 @@ public class Bid {
         this.productId = productId;
     }
 
-    /* bidderId */
+    // String - bidderId
     public String getBidderId() {
         return bidderId;
     }
@@ -47,15 +36,15 @@ public class Bid {
         this.bidderId = bidderId;
     }
 
-    /* bidAAmount */
-    public Double getBidAmount() {
+    // Double - bidAmount
+    public Double getBidAmouint() {
         return bidAmount;
     }
     public void setBidAmount(Double bidAmount) {
         this.bidAmount = bidAmount;
     }
 
-    /* bidTime */
+    // LocalDateTime - bidTime
     public LocalDateTime getBidTime() {
         return bidTime;
     }
