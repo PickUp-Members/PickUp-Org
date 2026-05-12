@@ -3,16 +3,11 @@ import Button from '../../Components/Button';
 import Input from '../../Components/Input';
 import Modal from '../../Components/Modal';
 import { CheckCircle, AlertCircle, Store, FileText } from 'lucide-react';
+import { applySeller } from '../../Services/userService';
 
 const BecomeSeller = () => {
-  // 🔥 AUTH REMOVED (safe mock user)
-  const user = {
-    role: 'USER',
-    businessDetails: null,
-    sellerRequestStatus: 'NONE'
-  };
+  const user = JSON.parse(localStorage.getItem('user'));
 
-  // 🔥 AUTH FUNCTION REMOVED (mock response)
   const requestSellerAccess = async (payload) => {
     console.log('Mock seller request:', payload);
     return { success: true };
@@ -34,25 +29,39 @@ const BecomeSeller = () => {
     setLoading(true);
     setError('');
 
-    const payload = {
-      name: formData.businessName,
-      description: formData.description,
-      contactPhone: formData.contactPhone,
-      documents: formData.documents
-    };
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
 
-    const results = await requestSellerAccess(payload);
+      if (!user || !user.id) {
+        setError("User not found. Please login again.");
+        setLoading(false);
+        return;
+      }
 
-    if (results.success) {
-      setShowModal(true);
-    } else {
-      setError('We could not submit your request. Please try again later.');
+      const payload = {
+        name: formData.businessName,
+        description: formData.description,
+        contactPhone: formData.contactPhone,
+        documents: formData.documents,
+      }
+
+      const result = await applySeller(user.id, payload);
+
+      if (result) {
+        setShowModal(true);
+
+        const updatedUser = { ...user, sellerRequestStatus: 'PENDING'};
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+      else {
+        setError("Request failed. Try again.");
+      }
     }
-
-    setLoading(false);
+    catch (error) {
+      setError("Server error. Try again.");
+    }
   };
 
-  // 🔥 SELLER CHECK SAFE
   if (user?.role === 'SELLER') {
     return (
       <div className="min-h-screen bg-[#f6f7f8] py-12">
