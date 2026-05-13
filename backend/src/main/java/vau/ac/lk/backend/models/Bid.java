@@ -37,7 +37,7 @@ public class Bid {
     }
 
     // Double - bidAmount
-    public Double getBidAmouint() {
+    public Double getBidAmount() {
         return bidAmount;
     }
     public void setBidAmount(Double bidAmount) {

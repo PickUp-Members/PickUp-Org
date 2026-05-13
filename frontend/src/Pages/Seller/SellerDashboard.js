@@ -37,24 +37,29 @@ const SellerDashboard = () => {
     const loadDashboard = async () => {
       if (!user) return;
 
-      const [loadedListings, loadedSales, loadedBids, loadedOrders] = await Promise.all([
-        api.getSellerListings(user.id),
-        api.getSellerSales(user.id),
-        api.getSellerBids(user.id),
-        api.getSellerOrders(user.id)
-      ]);
+      try {
+        const [loadedListings, loadedSales, loadedBids, loadedOrders] = await Promise.all([
+          api.getSellerListings(user.id),
+          api.getSellerSales(user.id),
+          api.getSellerBids(user.id),
+          api.getSellerOrders(user.id)
+        ]);
 
-      setListings(loadedListings || []);
-      setSales(loadedSales || []);
-      setBids(loadedBids || []);
-      setOrders(loadedOrders || []);
+        setListings(loadedListings || []);
+        setSales(loadedSales || []);
+        setBids(loadedBids || []);
+        setOrders(loadedOrders || []);
+      } catch (error) {
+        console.error("Dashboard load failed:", error);
+        // Keep existing empty states or handle error UI
+      }
     };
 
     loadDashboard();
   }, []);
 
   const stats = [
-    { label: 'Total Revenue', value: formatLKR(sales.reduce((t, s) => t + (s.revenue || 0), 0)), icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { label: 'Total Revenue', value: formatLKR(sales.reduce((t, s) => t + (s.totalAmount || 0), 0)), icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
     { label: 'Active Listings', value: listings.length, icon: Package, color: 'text-blue-500', bg: 'bg-blue-50' },
     { label: 'Pending Bids', value: bids.length, icon: Gavel, color: 'text-amber-500', bg: 'bg-amber-50' },
     { label: 'Total Orders', value: orders.length, icon: Users, color: 'text-purple-500', bg: 'bg-purple-50' },
@@ -188,22 +193,133 @@ const SellerDashboard = () => {
 
             {/* LISTINGS */}
             {activeTab === 'listings' && (
-              <div className="text-slate-500 font-bold">
-                Listings loaded: {listings.length}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="border-b">
+                    <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <th className="pb-4">Product</th>
+                      <th className="pb-4">Type</th>
+                      <th className="pb-4">Price/Bid</th>
+                      <th className="pb-4">Status</th>
+                      <th className="pb-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {listings.map(listing => (
+                      <tr key={listing.id} className="group">
+                        <td className="py-6">
+                          <div className="flex items-center gap-4">
+                            <img src={listing.images?.[0] || listing.img} className="w-12 h-12 rounded-xl object-cover" />
+                            <div>
+                              <p className="font-black text-slate-900">{listing.title}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">{listing.category}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-6 font-bold text-slate-600 text-xs uppercase tracking-wider">{listing.type}</td>
+                        <td className="py-6 font-black text-slate-900">
+                          {formatLKR(listing.type === 'FIXED' ? listing.price : (listing.currentBid || listing.startPrice))}
+                        </td>
+                        <td className="py-6">
+                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase
+                            ${listing.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                            {listing.status}
+                          </span>
+                        </td>
+                        <td className="py-6 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button onClick={() => openEditModal(listing)} className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors">
+                              <Pencil size={16} />
+                            </button>
+                            {listing.type === 'AUCTION' && listing.status === 'ACTIVE' && (
+                              <button onClick={() => handleEndAuction(listing.id)} className="p-2 hover:bg-amber-50 text-amber-600 rounded-lg transition-colors" title="End Auction Early">
+                                <Gavel size={16} />
+                              </button>
+                            )}
+                            <button onClick={() => handleDeleteListing(listing.id)} className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 
             {/* ORDERS */}
             {activeTab === 'orders' && (
-              <div className="text-slate-500 font-bold">
-                Orders loaded: {orders.length}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="border-b">
+                    <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <th className="pb-4">Order ID</th>
+                      <th className="pb-4">Buyer</th>
+                      <th className="pb-4">Total</th>
+                      <th className="pb-4">Status</th>
+                      <th className="pb-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {orders.map(order => (
+                      <tr key={order.id} className="group">
+                        <td className="py-6 font-black text-slate-900 text-xs">#{order.id.slice(-6).toUpperCase()}</td>
+                        <td className="py-6">
+                          <p className="font-black text-slate-900">{order.buyerName || 'Demo Buyer'}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase truncate max-w-[150px]">{order.shippingAddress}</p>
+                        </td>
+                        <td className="py-6 font-black text-slate-900">{formatLKR(order.totalAmount)}</td>
+                        <td className="py-6">
+                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase
+                            ${order.status === 'PENDING' ? 'bg-amber-50 text-amber-600' :
+                              order.status === 'SHIPPED' ? 'bg-blue-50 text-blue-600' :
+                              order.status === 'REJECTED' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="py-6 text-right">
+                          {order.status === 'PENDING' && (
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => handleShipOrder(order.id)} className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase hover:bg-emerald-100 transition-colors">
+                                Ship
+                              </button>
+                              <button onClick={() => setRejectingOrder(order)} className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase hover:bg-red-100 transition-colors">
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 
             {/* BIDS */}
             {activeTab === 'bids' && (
-              <div className="text-slate-500 font-bold">
-                Bids loaded: {bids.length}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="border-b">
+                    <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <th className="pb-4">Product ID</th>
+                      <th className="pb-4">Bid Amount</th>
+                      <th className="pb-4">Bidder</th>
+                      <th className="pb-4">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {bids.map((bid, i) => (
+                      <tr key={i} className="group">
+                        <td className="py-6 font-black text-slate-900 text-xs">#{bid.productId.slice(-6).toUpperCase()}</td>
+                        <td className="py-6 font-black text-emerald-600">{formatLKR(bid.bidAmount)}</td>
+                        <td className="py-6 font-bold text-slate-600 text-xs">#{bid.bidderId.slice(-6).toUpperCase()}</td>
+                        <td className="py-6 text-slate-400 text-[10px] font-bold">{new Date(bid.bidTime).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 
@@ -223,6 +339,22 @@ const SellerDashboard = () => {
           <div className="flex gap-3 pt-2">
             <Button variant="secondary" className="flex-1" onClick={() => setEditingListing(null)}>Cancel</Button>
             <Button className="flex-1" onClick={handleSaveListing}>Save</Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={!!rejectingOrder} onClose={() => setRejectingOrder(null)} title="Reject Order">
+        <div className="space-y-4">
+          <p className="text-xs font-bold text-slate-500">Please provide a reason for rejecting this order. This will be sent to the buyer and platform admin.</p>
+          <Input.TextArea 
+            label="Rejection Reason" 
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            placeholder="e.g. Item out of stock, shipping issues..."
+          />
+          <div className="flex gap-3 pt-2">
+            <Button variant="secondary" className="flex-1" onClick={() => setRejectingOrder(null)}>Cancel</Button>
+            <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={handleRejectOrder}>Confirm Reject</Button>
           </div>
         </div>
       </Modal>
