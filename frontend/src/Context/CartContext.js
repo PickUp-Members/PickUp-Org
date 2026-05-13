@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { mockCartItems } from '../Utils/mockData';
 
 const CartContext = createContext();
 
@@ -15,6 +16,9 @@ export const CartProvider = ({ children }) => {
     const saved = localStorage.getItem('cart');
     if (saved) {
       setCartItems(JSON.parse(saved));
+    } else {
+      setCartItems(mockCartItems);
+      localStorage.setItem('cart', JSON.stringify(mockCartItems));
     }
   }, []);
 
@@ -22,31 +26,31 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = useCallback((product) => {
+  const addToCart = useCallback((productId, quantity = 1) => {
+  try {
     setCartItems(prev => {
-      const existing = prev.find(item => item.productId === product.id);
-      
+      const existing = prev.find(
+        item => item.productId === productId
+      );
+
       if (existing) {
-        return prev.map(item => 
-          item.productId === product.id 
-            ? { ...item, quantity: item.quantity + 1 }
+        return prev.map(item =>
+          item.productId === productId
+            ? {
+                ...item,
+                quantity: item.quantity + quantity,
+              }
             : item
         );
       }
-      
-      return [...prev, { 
-        productId: product.id, 
-        title: product.title, 
-        price: product.price || product.currentBid, 
-        img: product.img, 
-        quantity: 1 
-      }];
-    });
-  }, []);
 
-  const removeFromCart = useCallback((productId) => {
-    setCartItems(prev => prev.filter(item => item.productId !== productId));
-  }, []);
+      return [...prev, { productId, quantity }];
+    });
+
+  } catch (error) {
+    console.error("Error adding item to cart:", error);
+  }
+}, []);
 
   const updateQuantity = useCallback((productId, quantity) => {
     if (quantity <= 0) {
@@ -55,13 +59,17 @@ export const CartProvider = ({ children }) => {
     setCartItems(prev => prev.map(item => 
       item.productId === productId ? { ...item, quantity } : item
     ));
-  }, [removeFromCart]);
+  }, []);
+
+  const removeFromCart = useCallback((productId) => {
+    setCartItems(prev => prev.filter(item => item.productId !== productId));
+  }, []);
 
   const clearCart = useCallback(() => {
     setCartItems([]);
   }, []);
 
-   const cartTotal = cartItems.reduce((total, item) => total + (item.quantity * (item.price || 0)), 0);
+  const cartTotal = cartItems.reduce((total, item) => total + (item.quantity * 45000), 0); // Stub price
 
   const value = {
     cartItems,
@@ -75,3 +83,5 @@ export const CartProvider = ({ children }) => {
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
+
+
