@@ -4,24 +4,41 @@ import ProductCard from '../../Components/ProductCard';
 import { useRecent } from '../../Context/RecentlyViewedContext';
 import { ArrowRight, Laptop, Shirt, Home as HomeIcon, Ghost, Gamepad2 } from 'lucide-react';
 import { formatLKR } from '../../Utils/formatters';
-import { api } from '../../Services/api';
+import { getAllProducts } from '../../Services/productService';
 
 const Home = () => {
   const navigate = useNavigate();
   const { recentItems } = useRecent();
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const results = await getAllProducts();
+
+      if (results) {
+        setProducts(results.slice(0, 8));
+      }
+      else {
+        console.error("Failed to load products");
+      }
+    }
+    catch (error) {
+      console.error("Error loading products:", error);
+    }
+    finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const items = await api.getProducts();
-      setProducts(items.slice(0, 4));
-    };
 
     loadProducts();
   }, []);
 
   const handleCategoryClick = (category) => {
-    category === 'All Categories' ? navigate('/products') : navigate(`/products?category=${encodeURIComponent(category)}`);
+    category === 'All Categories' ? navigate('/products') : navigate(`/products?category=${category}`);
   };
 
   const categories = [
