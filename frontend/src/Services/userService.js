@@ -41,18 +41,29 @@ export const getAllPendingRequests = async () => {
 // Approve Seller Request
 export const approveSellerRequest = async (userId) => {
     try {
-        const response = await axios.patch(`${url}/approveSellerRequest/${userId}`);
-        return response.data;
-    }
-    catch (error) {
-        console.error("approveSellerRequest error:", error.response?.data || error.message);
-        return {
-        success: false,
-        error: error.response?.data || "Server error",
-        };
-    }
-}
+        const response = await axios.patch(
+            `${url}/approveSellerRequest/${userId}`
+        );
 
+        return response.data;
+    } 
+    catch (error) {
+        console.error(
+            "approveSellerRequest error:",
+            error.response?.data || error.message
+        );
+
+        return {
+            success: false,
+            error: error.response?.data || "Server error",
+        };
+    } 
+    finally {
+        console.log("approveSellerRequest process completed");
+        // Example:
+        // setLoading(false); (if using loading state)
+    }
+};
 // Reject Seller Request
 export const rejectSellerRequest = async (userId) => {
     try {
