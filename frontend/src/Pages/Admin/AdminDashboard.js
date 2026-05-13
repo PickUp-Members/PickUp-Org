@@ -71,24 +71,28 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleRejectSeller = async (userId) => {
-    try {
-      const result = await rejectSellerRequest(userId);
+ const handleRejectSeller = async (userId) => {
+  try {
+    const result = await rejectSellerRequest(userId);
 
-      if (result) {
-        setRequests((prev) => prev.filter((r) => r.id !== userId));
-      }
-
-      setSelectedRequest(null);
-
-      alert("Seller rejected successfully");
+    if (result) {
+      setRequests((prev) => prev.filter((r) => r.id !== userId));
     }
-    catch (error) {
-      console.error("Reject seller error:", error);
-      alert("Server error");
-    }
-  };
 
+    setSelectedRequest(null);
+
+    alert("Seller rejected successfully");
+  } 
+  catch (error) {
+    console.error("Reject seller error:", error);
+    alert("Server error");
+  } 
+  finally {
+    console.log("Reject seller process completed");
+    // Example:
+    // setLoading(false);
+  }
+};
   // ================= RESOLVE DISPUTE =================
   const resolveDispute = async (disputeId) => {
 
