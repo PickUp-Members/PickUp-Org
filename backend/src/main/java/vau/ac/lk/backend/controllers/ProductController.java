@@ -28,7 +28,7 @@ public class ProductController {
         Product saved = productService.createProduct(product);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("product", saved);
+        response.put("listing", saved);
         return ResponseEntity.ok(response);
     }
 
@@ -37,7 +37,7 @@ public class ProductController {
         Product updated = productService.updateProduct(id, product);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("product", updated);
+        response.put("listing", updated);
         return ResponseEntity.ok(response);
     }
 
@@ -54,7 +54,7 @@ public class ProductController {
         Product updated = productService.endAuctionEarly(id);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        response.put("product", updated);
+        response.put("listing", updated);
         return ResponseEntity.ok(response);
     }
 }

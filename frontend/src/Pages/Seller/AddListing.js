@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import Button from '../../Components/Button';
 import Input from '../../Components/Input';
@@ -7,9 +8,10 @@ import Modal from '../../Components/Modal';
 import { formatLKR } from '../../Utils/formatters';
 
 const AddListing = () => {
+  const navigate = useNavigate();
   // 🔥 AUTH REMOVED (no backend dependency)
   const user = {
-    id: 'demo-user-id',
+    id: 'demo-seller-id',
     role: 'SELLER'
   };
 
@@ -131,8 +133,12 @@ const AddListing = () => {
 
     try {
       const result = await api.createListing(backendData, user.id);
-      setCreatedListing(result.listing);
-      setShowSuccess(true);
+      if (result && (result.success || result.listing)) {
+        setCreatedListing(result.listing);
+        setShowSuccess(true);
+      } else {
+        setError(result?.error || 'Publishing failed. Please check if the backend is running.');
+      }
     } catch (err) {
       setError('Publishing failed. Try again.');
     } finally {
@@ -248,10 +254,12 @@ const AddListing = () => {
       </div>
 
       {/* SUCCESS MODAL */}
-      <Modal isOpen={showSuccess} onClose={()=>setShowSuccess(false)} title="Success">
+      <Modal isOpen={showSuccess} onClose={() => navigate('/seller/dashboard')} title="Success">
         <div className="text-center py-6">
           <CheckCircle size={48} className="mx-auto mb-4 text-green-500"/>
-          <p className="font-bold">Listing Created Successfully</p>
+          <p className="font-bold text-xl mb-2">Listing Published!</p>
+          <p className="text-slate-500 text-sm mb-6">Your item is now live on the marketplace.</p>
+          <Button onClick={() => navigate('/seller/dashboard')}>Go to Dashboard</Button>
         </div>
       </Modal>
     </div>

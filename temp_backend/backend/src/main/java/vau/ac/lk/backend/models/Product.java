@@ -26,7 +26,6 @@ public class Product {
     private Double startPrice;
     private Double currentBid;
     private Double reservePrice;
-    private Double increment;
     private LocalDateTime endTime;
     private String winnerId;
 
@@ -37,7 +36,7 @@ public class Product {
 
     /* Constructors */
     public Product() {}
-    public Product(String id, String title, String description, String category, String sellerId, ProductType type, Double price, Integer stock, Double startPrice, Double currentBid, Double reservePrice, Double increment, LocalDateTime endTime, String winnerId, List<String> images, String status, LocalDateTime createdAt) {
+    public Product(String id, String title, String description, String category, String sellerId, ProductType type, Double price, Integer stock, Double startPrice, Double currentBid, Double reservePrice, LocalDateTime endTime, String winnerId, List<String> images, String status, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -49,7 +48,6 @@ public class Product {
         this.startPrice = startPrice;
         this.currentBid = currentBid;
         this.reservePrice = reservePrice;
-        this.increment = increment;
         this.endTime = endTime;
         this.winnerId = winnerId;
         this.images = images;
@@ -140,14 +138,6 @@ public class Product {
     }
     public void setReservePrice(Double reservePrice) {
         this.reservePrice = reservePrice;
-    }
-
-    /* increment */
-    public Double getIncrement() {
-        return increment;
-    }
-    public void setIncrement(Double increment) {
-        this.increment = increment;
     }
 
     /* endTime */

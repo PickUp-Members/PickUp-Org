@@ -1,0 +1,7 @@
+package vau.ac.lk.backend.repositories;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+import vau.ac.lk.backend.models.Product;
+
+public interface ProductRepository extends MongoRepository<Product, String> {
+}

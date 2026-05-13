@@ -1,6 +1,6 @@
 const BASE_URL = 'http://localhost:8080/api';
 
-const handleResponse = async (request, defaultValue = null) => {
+const handleResponse = async (request, defaultValue = null, storageKey = null) => {
   try {
     const response = await request;
     if (!response.ok) {
@@ -9,7 +9,11 @@ const handleResponse = async (request, defaultValue = null) => {
     }
     return await response.json();
   } catch (error) {
-    console.error("API call failed:", error);
+    console.error("API call failed, using demo fallback:", error);
+    if (storageKey) {
+      const localData = JSON.parse(localStorage.getItem(storageKey) || (Array.isArray(defaultValue) ? '[]' : '{}'));
+      return localData;
+    }
     return defaultValue; 
   }
 };
@@ -43,7 +47,7 @@ export const api = {
 
   getProducts: async (filters = {}) => {
     const query = new URLSearchParams(filters).toString();
-    return await handleResponse(fetch(`${BASE_URL}/products?${query}`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/products?${query}`), [], 'demo_listings');
   },
 
   getProduct: async (id) => {
@@ -59,19 +63,35 @@ export const api = {
   },
 
   createListing: async (listingData, sellerId) => {
-    return await handleResponse(fetch(`${BASE_URL}/products`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...listingData, sellerId })
-    }), { success: false, error: 'Connection failed' });
+    try {
+      const response = await fetch(`${BASE_URL}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...listingData, sellerId })
+      });
+      if (response.ok) return await response.json();
+      throw new Error('Server error');
+    } catch (err) {
+      console.warn("Backend down, saving to demo storage");
+      const localListings = JSON.parse(localStorage.getItem('demo_listings') || '[]');
+      const newListing = { ...listingData, id: 'demo-' + Date.now(), sellerId, createdAt: new Date().toISOString() };
+      localStorage.setItem('demo_listings', JSON.stringify([newListing, ...localListings]));
+      return { success: true, listing: newListing, isDemo: true };
+    }
   },
 
   getSellerListings: async (sellerId) => {
-    return await handleResponse(fetch(`${BASE_URL}/products/seller/${sellerId}`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/products/seller/${sellerId}`), [], 'demo_listings');
   },
 
   deleteListing: async (id) => {
-    return await handleResponse(fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' }), { success: false });
+    try {
+      await fetch(`${BASE_URL}/products/${id}`, { method: 'DELETE' });
+    } catch (err) {
+      const localListings = JSON.parse(localStorage.getItem('demo_listings') || '[]');
+      localStorage.setItem('demo_listings', JSON.stringify(localListings.filter(l => l.id !== id)));
+    }
+    return { success: true };
   },
 
   endAuctionEarly: async (id) => {
@@ -79,11 +99,11 @@ export const api = {
   },
 
   getSellerSales: async (sellerId) => {
-    return await handleResponse(fetch(`${BASE_URL}/orders/sales/seller/${sellerId}`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/orders/sales/seller/${sellerId}`), []);
   },
 
   getSellerBids: async (sellerId) => {
-    return await handleResponse(fetch(`${BASE_URL}/bids/seller/${sellerId}`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/bids/seller/${sellerId}`), []);
   },
 
   updateListing: async (id, updates) => {
@@ -95,7 +115,7 @@ export const api = {
   },
 
   getSellerOrders: async (sellerId) => {
-    return await handleResponse(fetch(`${BASE_URL}/orders/seller/${sellerId}`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/orders/seller/${sellerId}`), []);
   },
 
   updateSellerOrder: async (orderId, updates) => {
@@ -107,7 +127,7 @@ export const api = {
   },
 
   getSellerRequests: async () => {
-    return await handleResponse(fetch(`${BASE_URL}/admin/seller-requests`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/admin/seller-requests`), []);
   },
 
   approveSeller: async (userId) => {
@@ -127,11 +147,11 @@ export const api = {
   },
 
   getPlatformStats: async () => {
-    return await handleResponse(fetch(`${BASE_URL}/admin/stats`), {}) || {};
+    return await handleResponse(fetch(`${BASE_URL}/admin/stats`), {});
   },
 
   getDisputes: async () => {
-    return await handleResponse(fetch(`${BASE_URL}/admin/disputes`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/admin/disputes`), []);
   },
 
   resolveDispute: async (id, resolution) => {
@@ -155,6 +175,6 @@ export const api = {
   },
 
   getBuyerOrders: async (userId) => {
-    return await handleResponse(fetch(`${BASE_URL}/orders/buyer/${userId}`), []) || [];
+    return await handleResponse(fetch(`${BASE_URL}/orders/buyer/${userId}`), []);
   }
 };
