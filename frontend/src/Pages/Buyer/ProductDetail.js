@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../../Context/CartContext';
 import { useWishlist } from '../../Context/WishlistContext';
-import { api } from '../../Services/api';
+import { getAllProducts } from '../../Services/productService';
 import { formatLKR, getMinBid } from '../../Utils/formatters';
 import Button from '../../Components/Button';
 import Input from '../../Components/Input';
@@ -24,14 +24,29 @@ const ProductDetail = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [showBidModal, setShowBidModal] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      const data = await api.getProduct(id);
-      setProduct(data);
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const results = await getAllProducts();
+
+      if (results) {
+        setProduct(results.slice(0, 8));
+      }
+      else {
+        console.error("Failed to load products");
+      }
+    }
+    catch (error) {
+      console.error("Error loading products:", error);
+    }
+    finally {
       setLoading(false);
-    };
-    load();
-  }, [id]);
+    }
+  }
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   if (loading) return <div className="p-10">Loading...</div>;
   if (!product) return <div className="p-10">Not found</div>;
