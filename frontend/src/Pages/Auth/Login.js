@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { loginUser } from '../../Services/authService';
 
@@ -10,6 +10,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -30,7 +32,8 @@ const Login = () => {
         navigate('/seller/dashboard');
       }
       else {
-        navigate('/');
+        // Redirect to the page they were trying to access, or home
+        navigate(from);
       }
     }
     catch (error) {

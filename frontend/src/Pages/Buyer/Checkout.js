@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../Context/CartContext';
+import { useAuthStore } from '../../store/authStore';
 import { api } from '../../Services/api';
 import { ArrowLeft, CreditCard, Truck, Loader2, ShieldCheck } from 'lucide-react';
 import { formatLKR } from '../../Utils/formatters';
@@ -8,11 +9,21 @@ import { formatLKR } from '../../Utils/formatters';
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { user } = useAuthStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      navigate('/login', { state: { from: '/checkout' } });
+    }
+  }, [user, navigate]);
   
-  const user = null;
+  // Don't render if no user
+  if (!user) {
+    return null;
+  }
 
   const shipping = cartItems.length > 0 ? 15.00 : 0;
   const total = cartTotal + shipping;

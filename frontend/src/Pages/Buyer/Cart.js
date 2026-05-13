@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../Context/CartContext';
-import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
+import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, Loader2, LogIn } from 'lucide-react';
 import { formatLKR } from '../../Utils/formatters';
+import Modal from '../../Components/Modal';
 
 const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { user } = useAuthStore();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const shipping = cartItems.length > 0 ? 15.00 : 0;
   const total = cartTotal + shipping;
 
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
+    
+    // Check if user is logged in
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     
     setIsProcessing(true);
       setTimeout(() => {
@@ -88,6 +98,39 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      {/* Authentication Modal */}
+      <Modal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)}>
+        <div className="text-center py-6">
+          <div className="bg-blue-100 dark:bg-blue-900/30 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <LogIn size={40} className="text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-4">Login Required</h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-8">
+            Please login or create an account to proceed with checkout
+          </p>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => {
+                setShowAuthModal(false);
+                navigate('/login', { state: { from: '/cart' } });
+              }}
+              className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => {
+                setShowAuthModal(false);
+                navigate('/register', { state: { from: '/cart' } });
+              }}
+              className="bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white px-8 py-3 rounded-2xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+            >
+              Register
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

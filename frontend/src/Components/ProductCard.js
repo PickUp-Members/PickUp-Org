@@ -37,7 +37,9 @@ const ProductCard = ({ product }) => {
       </div>
 
       <div className="mt-4 flex flex-col gap-1">
-        <p className="text-xs text-slate-500 dark:text-slate-400">{product.brand} • {product.category}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          {product.brand ? `${product.brand} • ` : ''}{product.category}
+        </p>
         <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{product.title}</h3>
         <div className="mt-2 flex items-center justify-between">
           <div className="flex flex-col">

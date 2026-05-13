@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo.png';
-import { registerUser } from '../../Services/authService';
+import { registerUser, loginUser } from '../../Services/authService';
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -42,7 +44,17 @@ const Register = () => {
 
       console.log(result);
 
-      navigate(('/login'));
+      // Auto-login after registration
+      try {
+        const user = await loginUser(formData.email, formData.password);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // Redirect to the page they were trying to access
+        navigate(from);
+      } catch (loginError) {
+        // If auto-login fails, redirect to login page
+        navigate('/login', { state: { from } });
+      }
     }
     catch (error) {
       console.error(error);

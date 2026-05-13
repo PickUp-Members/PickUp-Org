@@ -1,4 +1,5 @@
 import axios from "axios";
+import { mockProducts } from "../Utils/mockData";
 
 const url = "http://localhost:8080/api/product";
 
@@ -9,9 +10,8 @@ export const getAllProducts = async () => {
     }
     catch (error) {
         console.error("getAllProducts error:", error.response?.data || error.message);
-        return {
-        success: false,
-        error: error.response?.data || "Server error",
-        };
+        console.log("Using mock data as fallback");
+        // Return mock data as fallback when backend is not available
+        return mockProducts;
     }
 }
