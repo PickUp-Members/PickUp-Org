@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { api } from '../../Services/api';
+import { getAllProducts } from '../../Services/productService';
 import { useWishlist } from '../../Context/WishlistContext';
 import { useRecent } from '../../Context/RecentlyViewedContext';
 import { Heart } from 'lucide-react'; 
@@ -17,21 +17,29 @@ const ProductList = () => {
   const searchQuery = searchParams.get('search') || '';
   const selectedCategory = searchParams.get('category') || 'All';
 
-  useEffect(() => {
-    const loadProducts = async () => {
+  const loadProducts = async () => {
+    try {
       setLoading(true);
-      try {
-        const data = await api.getProducts({ category: selectedCategory, search: searchQuery });
-        setProducts(Array.isArray(data) ? data : []);
-      } catch (error) { 
-        console.error(error);
-        setProducts([]); 
-      } finally { 
-        setLoading(false); 
+      const result = await getAllProducts();
+
+      if (result) {
+        setProducts(result);
       }
-    };
+      else {
+        console.error("Failed to load products");
+      }
+    }
+    catch (error) {
+      console.error("Error loading products:", error);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadProducts();
-  }, [searchQuery, selectedCategory]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20 pt-6">
